@@ -155,6 +155,21 @@ const GLfloat FOGDENSITY  = { 0.30f };
 const GLfloat FOGSTART    = { 1.5 };
 const GLfloat FOGEND      = { 4. };
 
+// Bezier curves:
+const int NUMPOINTS = 30;
+const int NUMCURVES = 2;
+
+struct Point
+{
+	float x0, y0, z0;       // initial coordinates
+	float x, y, z;        // animated coordinates
+};
+
+struct Curve
+{
+	float r, g, b;
+	Point p0, p1, p2, p3;
+};
 
 // what options should we compile-in?
 // in general, you don't need to worry about these
@@ -164,10 +179,13 @@ const GLfloat FOGEND      = { 4. };
 
 // non-constant global variables:
 
-int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
-int		AxesOn;					// != 0 means to draw the axes
 GLuint	BoxList;				// object display list
+
+GLuint  keylist;				// List for keyboard keys
+
+int		ActiveButton;			// current button that is down
+int		AxesOn;					// != 0 means to draw the axes
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -180,6 +198,8 @@ int		WhichProjection;		// ORTHO or PERSP
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 
+Curve Curves[NUMCURVES];		// if you are creating a pattern of curves
+Curve key;						// if you are not
 
 // function prototypes:
 
@@ -219,6 +239,8 @@ short			ReadShort( FILE * );
 void			Cross(float[3], float[3], float[3]);
 float			Dot(float [3], float [3]);
 float			Unit(float [3], float [3]);
+
+void	drawkey( struct Curve& ); // function to draw a key
 
 
 // main program:
@@ -377,7 +399,7 @@ Display( )
 
 	if( AxesOn != 0 )
 	{
-		glColor3fv( &Colors[WhichColor][0] );
+		glColor3fv( &Colors[WhichColor][1] );
 		glCallList( AxesList );
 	}
 
@@ -387,7 +409,8 @@ Display( )
 
 	// draw the current object:
 
-	glCallList( BoxList );
+	//glCallList( BoxList );
+	glCallList( keylist );
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
@@ -784,9 +807,14 @@ InitLists( )
 	AxesList = glGenLists( 1 );
 	glNewList( AxesList, GL_COMPILE );
 		glLineWidth( AXES_WIDTH );
-			Axes( 1.5 );
+			Axes( 1. );
 		glLineWidth( 1. );
 	glEndList( );
+
+	keylist = glGenLists( 1 );
+	glNewList(keylist, GL_COMPILE);
+		drawkey( key );
+	glEndList();
 }
 
 
@@ -1132,6 +1160,72 @@ Axes( float length )
 			glVertex3f( 0.0, fact*zy[j], base + fact*zx[j] );
 		}
 	glEnd( );
+
+}
+
+void drawkey(struct Curve& k) {
+
+	k.p0.x = 0.;
+	k.p0.y = 0.75;
+	k.p0.z = 0.;
+
+	k.p1.x = 0.25;
+	k.p1.y = 0.6;
+	k.p1.z = 0.;
+
+	k.p2.x = 0.5;
+	k.p2.y = 0.6;
+	k.p2.z =0.;
+
+	k.p3.x = 0.75;
+	k.p3.y = 0.75;
+	k.p3.z = 0.;
+
+	glLineWidth(3.);
+	glColor3f(1., 1., 1.);
+
+	glBegin(GL_TRIANGLE_STRIP);
+		for (int it = 0; it <= NUMPOINTS; it++)
+		{
+			float t = (float)it / (float)NUMPOINTS;
+			float omt = 1.f - t;
+			float x = omt * omt * omt * k.p0.x + 3.f * t * omt * omt * k.p1.x + 3.f * t * t * omt * k.p2.x + t * t * t * k.p3.x;
+			float y = omt * omt * omt * k.p0.y + 3.f * t * omt * omt * k.p1.y + 3.f * t * t * omt * k.p2.y + t * t * t * k.p3.y;
+			float z = omt * omt * omt * k.p0.z + 3.f * t * omt * omt * k.p1.z + 3.f * t * t * omt * k.p2.z + t * t * t * k.p3.z;
+			glVertex3f(x, y, z);
+			glVertex3f(x, y, z + 0.75);
+
+		}
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	
+		//glVertex3f(0., 0.75, 0.75);
+		//glVertex3f(0., 0.75, 0.);
+
+		//glVertex3f(0., 0.75, 0.);
+		//glVertex3f(0., 0., 0.);
+
+		//glVertex3f(0., 0., 0.75);
+		//glVertex3f(0., 0.75, 0.75);
+		//glVertex3f(0.75, 0., 0.75);
+
+
+
+
+		//glVertex3f(0.75, 0.75, 0.);
+		//glVertex3f(0.75, 0.75, 0.75);
+
+		//glVertex3f(0., 0., 0.);
+		//glVertex3f(0., 0., 0.75);
+
+		//glVertex3f(0.75, 0., 0.);
+		//glVertex3f(0.75, 0., 0.75);
+	glEnd();
+
+
+	glEnd();
+	glLineWidth(1.);
 
 }
 
