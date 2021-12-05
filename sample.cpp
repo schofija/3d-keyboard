@@ -189,8 +189,8 @@ const float uShininess		= 1.;
 
 // Keyboard case 
 const float CASE_THICKNESS = 0.2;
-const float CASE_LENGTH = 4.;
-const float CASE_WIDTH = 10.;
+const float CASE_LENGTH = 4.6;
+const float CASE_WIDTH = 12.;
 const float CASE_HEIGHT = 0.75;
 
 
@@ -465,19 +465,23 @@ Display( )
 
 	//glCallList( BoxList );
 	glPushMatrix();
-	Pattern->Use();
-	Pattern->SetUniformVariable("uTime", Time);
-	Pattern->SetUniformVariable("uKa", uKa);
-	Pattern->SetUniformVariable("uKd", uKd);
-	Pattern->SetUniformVariable("uKs", uKs);
-	Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
-	Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
-	Pattern->SetUniformVariable("uShininess", uShininess);
-	glTranslatef(-.5, -0.1, -.5);
-	glCallList(caselist);
-	Pattern->Use(0);
+		Pattern->Use();
+
+			Pattern->SetUniformVariable("uTime", Time);
+			Pattern->SetUniformVariable("uKa", uKa);
+			Pattern->SetUniformVariable("uKd", uKd);
+			Pattern->SetUniformVariable("uKs", uKs);
+			Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+			Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
+			Pattern->SetUniformVariable("uShininess", uShininess);
+			glTranslatef(-1.1, -0.1, -.5);
+
+				glCallList(caselist);
+
+		Pattern->Use(0);
 	glPopMatrix();
 
+	// This for loop covers most of the keys
 	for(int j = 0; j < 4; j++)
 	{
 		for(int i = 0; i < 10; i++)
@@ -499,7 +503,8 @@ Display( )
 			
 					if(keyPressed && i == keyi && j == keyj)
 					{
-						glTranslatef(0., -0.75, 0.);
+						//glTranslatef(0., -0.75, 0.); // originale
+						glTranslatef(0., -0.5, 0.);
 					}
 
 					if(keyReleased && i == keyi && j == keyj)
@@ -516,7 +521,62 @@ Display( )
 
 			glPopMatrix();
 		}
-	}
+
+		//Special keys
+		// Tilde
+		glPushMatrix();
+			glTranslatef(-.8, 0., 0.);
+			glCallList(keylist);
+		glPopMatrix();
+
+		//Tab
+		glPushMatrix();
+			glTranslatef(-.8, 0., 0.8);
+			glScalef(1.45, 1., 1.);
+			glCallList(keylist);
+		glPopMatrix();
+
+		//Caps-lock
+		glPushMatrix();
+			glTranslatef(-.8, 0., 1.6);
+			glScalef(1.9, 1., 1.);
+			glCallList(keylist);
+		glPopMatrix();
+
+		//Left-shift
+		glPushMatrix();
+			glTranslatef(-.8, 0., 2.4);
+			glScalef(2.3, 1., 1.);
+			glCallList(keylist);
+		glPopMatrix();
+
+		//Right-shift
+		glPushMatrix();
+		glTranslatef(.8*10 + 1, 0., 2.4);
+		glScalef(2.3, 1., 1.);
+			glCallList(keylist);
+		glPopMatrix();
+		
+		// Bottom-row
+
+			for(int i = 0; i < 8; i++)
+			{
+				glPushMatrix();
+					if(i<=3)
+					{
+						glTranslatef(-.8 + i * .96, 0., 3.2);
+					}
+
+					else{ glTranslatef(-.8 + i * .96 + 3.9, 0., 3.2); }
+					
+					if(i == 3)
+					{
+						glScalef(6.3, 1., 1.);
+					}
+					else{ glScalef(1.2, 1., 1.); }
+					glCallList(keylist);
+				glPopMatrix();
+	}		}
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
