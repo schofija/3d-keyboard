@@ -158,20 +158,35 @@ const GLfloat FOGSTART    = { 1.5 };
 const GLfloat FOGEND      = { 4. };
 
 // Bezier curves:
-const int NUMPOINTS = 30;
-const int NUMCURVES = 2;
+	const int NUMPOINTS = 30;
+	const int NUMCURVES = 2;
 
-struct Point
-{
-	float x0, y0, z0;       // initial coordinates
-	float x, y, z;        // animated coordinates
-};
+	struct Point
+	{
+		float x0, y0, z0;       // initial coordinates
+		float x, y, z;        // animated coordinates
+	};
 
-struct Curve
-{
-	float r, g, b;
-	Point p0, p1, p2, p3;
-};
+	struct Curve
+	{
+		float r, g, b;
+		Point p0, p1, p2, p3;
+	};
+
+// Shader constants:
+const float uKa	= 1.;
+const float uKd	= .9;
+const float uKs	= .9;
+
+const float uColorR = .75;
+const float uColorG = .75;
+const float uColorB = .75;
+
+const float uSpecR = 1.;
+const float uSpecG = 1.;
+const float uSpecB = 1.;
+const float uShininess		= 100.;
+
 
 // what options should we compile-in?
 // in general, you don't need to worry about these
@@ -418,8 +433,20 @@ Display( )
 	{
 		glPushMatrix();
 
-			glTranslatef(0.8 * i, 0., 0.);
-			glCallList( keylist );
+			Pattern->Use();
+			Pattern->SetUniformVariable("uTime", Time);
+			Pattern->SetUniformVariable("uKa", uKa );
+			Pattern->SetUniformVariable("uKd", uKd);
+			Pattern->SetUniformVariable("uKs", uKs);
+			Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+			Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
+			Pattern->SetUniformVariable("uShininess", uShininess);
+			
+
+				glTranslatef(0.8 * i, 0., 0.);
+				glCallList( keylist );
+
+			Pattern->Use(0);
 
 		glPopMatrix();
 	}
