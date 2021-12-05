@@ -397,7 +397,7 @@ Display( )
 
 	// possibly draw the axes:
 
-	if( AxesOn != 0 )
+	if( AxesOn == 0 )
 	{
 		glColor3fv( &Colors[WhichColor][1] );
 		glCallList( AxesList );
@@ -410,7 +410,15 @@ Display( )
 	// draw the current object:
 
 	//glCallList( BoxList );
-	glCallList( keylist );
+	for(int i = -5; i < 5; i++)
+	{
+		glPushMatrix();
+
+			glTranslatef(0.8 * i, 0., 0.);
+			glCallList( keylist );
+
+		glPopMatrix();
+	}
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
@@ -1163,6 +1171,9 @@ Axes( float length )
 
 }
 
+// Function to draw a single keycap on the keyboard
+// This function uses a modified version of the provided bezier
+// curve drawing program in order to have smooth indents on the keys
 void drawkey(struct Curve& k) {
 
 	k.p0.x = 0.;
@@ -1170,11 +1181,11 @@ void drawkey(struct Curve& k) {
 	k.p0.z = 0.;
 
 	k.p1.x = 0.25;
-	k.p1.y = 0.6;
+	k.p1.y = 0.65;
 	k.p1.z = 0.;
 
 	k.p2.x = 0.5;
-	k.p2.y = 0.6;
+	k.p2.y = 0.65;
 	k.p2.z =0.;
 
 	k.p3.x = 0.75;
@@ -1182,8 +1193,9 @@ void drawkey(struct Curve& k) {
 	k.p3.z = 0.;
 
 	glLineWidth(3.);
-	glColor3f(1., 1., 1.);
+	glColor3f(.75, .75, 0.75);
 
+	//Draw the top of the key
 	glBegin(GL_TRIANGLE_STRIP);
 		for (int it = 0; it <= NUMPOINTS; it++)
 		{
@@ -1192,41 +1204,63 @@ void drawkey(struct Curve& k) {
 			float x = omt * omt * omt * k.p0.x + 3.f * t * omt * omt * k.p1.x + 3.f * t * t * omt * k.p2.x + t * t * t * k.p3.x;
 			float y = omt * omt * omt * k.p0.y + 3.f * t * omt * omt * k.p1.y + 3.f * t * t * omt * k.p2.y + t * t * t * k.p3.y;
 			float z = omt * omt * omt * k.p0.z + 3.f * t * omt * omt * k.p1.z + 3.f * t * t * omt * k.p2.z + t * t * t * k.p3.z;
+
 			glVertex3f(x, y, z);
 			glVertex3f(x, y, z + 0.75);
-
 		}
 	glEnd();
 
-	glBegin(GL_LINE_LOOP);
-	
-		//glVertex3f(0., 0.75, 0.75);
-		//glVertex3f(0., 0.75, 0.);
 
-		//glVertex3f(0., 0.75, 0.);
-		//glVertex3f(0., 0., 0.);
+	//Draw the back side of the key
+	glBegin(GL_TRIANGLE_STRIP);
+	for (int it = 0; it <= NUMPOINTS; it++)
+	{
+		float t = (float)it / (float)NUMPOINTS;
+		float omt = 1.f - t;
+		float x = omt * omt * omt * k.p0.x + 3.f * t * omt * omt * k.p1.x + 3.f * t * t * omt * k.p2.x + t * t * t * k.p3.x;
+		float y = omt * omt * omt * k.p0.y + 3.f * t * omt * omt * k.p1.y + 3.f * t * t * omt * k.p2.y + t * t * t * k.p3.y;
+		float z = omt * omt * omt * k.p0.z + 3.f * t * omt * omt * k.p1.z + 3.f * t * t * omt * k.p2.z + t * t * t * k.p3.z;
 
-		//glVertex3f(0., 0., 0.75);
-		//glVertex3f(0., 0.75, 0.75);
-		//glVertex3f(0.75, 0., 0.75);
+		
+		glVertex3f(x, y, 0);
+		glVertex3f(x, 0, 0);
 
-
-
-
-		//glVertex3f(0.75, 0.75, 0.);
-		//glVertex3f(0.75, 0.75, 0.75);
-
-		//glVertex3f(0., 0., 0.);
-		//glVertex3f(0., 0., 0.75);
-
-		//glVertex3f(0.75, 0., 0.);
-		//glVertex3f(0.75, 0., 0.75);
+	}
 	glEnd();
 
+	//Draw the front side of the key
+	glBegin(GL_TRIANGLE_STRIP);
+	for (int it = 0; it <= NUMPOINTS; it++)
+	{
+		float t = (float)it / (float)NUMPOINTS;
+		float omt = 1.f - t;
+		float x = omt * omt * omt * k.p0.x + 3.f * t * omt * omt * k.p1.x + 3.f * t * t * omt * k.p2.x + t * t * t * k.p3.x;
+		float y = omt * omt * omt * k.p0.y + 3.f * t * omt * omt * k.p1.y + 3.f * t * t * omt * k.p2.y + t * t * t * k.p3.y;
+		float z = omt * omt * omt * k.p0.z + 3.f * t * omt * omt * k.p1.z + 3.f * t * t * omt * k.p2.z + t * t * t * k.p3.z;
+
+
+		glVertex3f(x, y, .75);
+		glVertex3f(x, 0, .75);
+
+	}
+	glEnd();
+
+	// Draw the left and right side of the keys
+	glBegin(GL_QUADS);
+
+		// Left
+		glVertex3f(0., 0., 0.);
+		glVertex3f(0., 0., 0.75);
+		glVertex3f(0., k.p3.y, 0.75);
+		glVertex3f(0., k.p3.y, 0.);
+
+		// Right
+		glVertex3f(k.p3.x, 0., 0.);
+		glVertex3f(k.p3.x, 0., 0.75);
+		glVertex3f(k.p3.x, k.p3.y, 0.75);
+		glVertex3f(k.p3.x, k.p3.y, 0.);
 
 	glEnd();
-	glLineWidth(1.);
-
 }
 
 // read a BMP file into a Texture:
