@@ -38,7 +38,7 @@
 
 // title of these windows:
 
-const char *WINDOWTITLE = { "OpenGL / GLUT Sample -- Joe Graphics" };
+const char *WINDOWTITLE = { "CS450 Final Project -- Jack Schofield" };
 const char *GLUITITLE   = { "User Interface Window" };
 
 // what the glui package defines as true and false:
@@ -249,6 +249,8 @@ int		NumLngs, NumLats;
 struct point* Pts;
 int widthtest = 1024;
 int heighttest = 512;
+
+bool drawtext = false;
 
 
 // function prototypes:
@@ -526,30 +528,33 @@ Display( )
 	}
 #endif
 
-	// draw some gratuitous text that just rotates on top of the scene:
+	if(drawtext)
+	{
+		// draw some gratuitous text that just rotates on top of the scene:
 
-	glDisable( GL_DEPTH_TEST );
-	glColor3f( 0., 1., 1. );
-	DoRasterString( 0., 1., 0., (char *)"Text That Moves" );
+		glDisable( GL_DEPTH_TEST );
+		glColor3f( 0., 1., 1. );
+		DoRasterString( 0., 1., 0., (char *)"Text That Moves" );
 
-	// draw some gratuitous text that is fixed on the screen:
-	//
-	// the projection matrix is reset to define a scene whose
-	// world coordinate system goes from 0-100 in each axis
-	//
-	// this is called "percent units", and is just a convenience
-	//
-	// the modelview matrix is reset to identity as we don't
-	// want to transform these coordinates
+		// draw some gratuitous text that is fixed on the screen:
+		//
+		// the projection matrix is reset to define a scene whose
+		// world coordinate system goes from 0-100 in each axis
+		//
+		// this is called "percent units", and is just a convenience
+		//
+		// the modelview matrix is reset to identity as we don't
+		// want to transform these coordinates
 
-	glDisable( GL_DEPTH_TEST );
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity( );
-	gluOrtho2D( 0., 100.,     0., 100. );
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity( );
-	glColor3f( 1., 1., 1. );
-	DoRasterString( 5., 5., 0., (char *)"Text That Doesn't" );
+		glDisable( GL_DEPTH_TEST );
+		glMatrixMode( GL_PROJECTION );
+		glLoadIdentity( );
+		gluOrtho2D( 0., 100.,     0., 100. );
+		glMatrixMode( GL_MODELVIEW );
+		glLoadIdentity( );
+		glColor3f( 1., 1., 1. );
+		DoRasterString( 5., 5., 0., (char *)"Text That Doesn't" );
+	}
 
 	// swap the double-buffered framebuffers:
 
@@ -1184,7 +1189,7 @@ Keyboard( unsigned char c, int x, int y )
 	{
 
 	case ESCAPE:
-		DoMainMenu(QUIT); // will not return here
+		drawtext = true; // will not return here
 		break;			// happy compiler
 
 	case '1':
@@ -1484,6 +1489,10 @@ void KbdUp(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
+	case ESCAPE:
+		DoMainMenu(QUIT); // will not return here
+		break;			// happy compiler
+
 		case '1':
 			printf( " Key released \n ");
 			keyPressed = false;
