@@ -174,9 +174,9 @@ const GLfloat FOGEND      = { 4. };
 	};
 
 // Shader constants:
-const float uKa	= 1.;
-const float uKd	= .9;
-const float uKs	= .9;
+const float uKa	= .3;
+const float uKd	= .3;
+const float uKs	= .3;
 
 const float uColorR = .75;
 const float uColorG = .75;
@@ -185,7 +185,7 @@ const float uColorB = .75;
 const float uSpecR = 1.;
 const float uSpecG = 1.;
 const float uSpecB = 1.;
-const float uShininess		= 100.;
+const float uShininess		= 1.;
 
 
 // what options should we compile-in?
@@ -429,26 +429,29 @@ Display( )
 	// draw the current object:
 
 	//glCallList( BoxList );
-	for(int i = -5; i < 5; i++)
+	for(int j = 0; j < 4; j++)
 	{
-		glPushMatrix();
+		for(int i = -5; i < 5; i++)
+		{
+			glPushMatrix();
 
-			Pattern->Use();
-			Pattern->SetUniformVariable("uTime", Time);
-			Pattern->SetUniformVariable("uKa", uKa );
-			Pattern->SetUniformVariable("uKd", uKd);
-			Pattern->SetUniformVariable("uKs", uKs);
-			Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
-			Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
-			Pattern->SetUniformVariable("uShininess", uShininess);
+				Pattern->Use();
+				Pattern->SetUniformVariable("uTime", Time);
+				Pattern->SetUniformVariable("uKa", uKa );
+				Pattern->SetUniformVariable("uKd", uKd);
+				Pattern->SetUniformVariable("uKs", uKs);
+				Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+				Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
+				Pattern->SetUniformVariable("uShininess", uShininess);
 			
 
-				glTranslatef(0.8 * i, 0., 0.);
-				glCallList( keylist );
+					glTranslatef(0.8 * i + (float(j) / 3), 0., 0.8 * j);
+					glCallList( keylist );
 
-			Pattern->Use(0);
+				Pattern->Use(0);
 
-		glPopMatrix();
+			glPopMatrix();
+		}
 	}
 
 #ifdef DEMO_Z_FIGHTING
@@ -1251,7 +1254,10 @@ void drawkey(struct Curve& k) {
 			float y = omt * omt * omt * k.p0.y + 3.f * t * omt * omt * k.p1.y + 3.f * t * t * omt * k.p2.y + t * t * t * k.p3.y;
 			float z = omt * omt * omt * k.p0.z + 3.f * t * omt * omt * k.p1.z + 3.f * t * t * omt * k.p2.z + t * t * t * k.p3.z;
 
+			glNormal3f(x, y, z);
 			glVertex3f(x, y, z);
+
+			glNormal3f(x, y, z + 0.75);
 			glVertex3f(x, y, z + 0.75);
 		}
 	glEnd();
@@ -1267,7 +1273,7 @@ void drawkey(struct Curve& k) {
 		float y = omt * omt * omt * k.p0.y + 3.f * t * omt * omt * k.p1.y + 3.f * t * t * omt * k.p2.y + t * t * t * k.p3.y;
 		float z = omt * omt * omt * k.p0.z + 3.f * t * omt * omt * k.p1.z + 3.f * t * t * omt * k.p2.z + t * t * t * k.p3.z;
 
-		
+		glNormal3f(x, y, -1.);
 		glVertex3f(x, y, 0);
 		glVertex3f(x, 0, 0);
 
@@ -1284,7 +1290,7 @@ void drawkey(struct Curve& k) {
 		float y = omt * omt * omt * k.p0.y + 3.f * t * omt * omt * k.p1.y + 3.f * t * t * omt * k.p2.y + t * t * t * k.p3.y;
 		float z = omt * omt * omt * k.p0.z + 3.f * t * omt * omt * k.p1.z + 3.f * t * t * omt * k.p2.z + t * t * t * k.p3.z;
 
-
+		glNormal3f(x, y, 1.);
 		glVertex3f(x, y, .75);
 		glVertex3f(x, 0, .75);
 

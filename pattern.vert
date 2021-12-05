@@ -8,7 +8,7 @@ out vec2  	vST;		// texture coords
 	out vec3 vL; //vector from point to light
 	out vec3 vE; //vector from point to eye
 
-	const vec3 LightPosition = vec3(  0., 5., 5. );
+	const vec3 LightPosition = vec3(  0., 3., 15. );
 
 const float PI = 	3.14159265;
 const float AMP = 	0.2;		// amplitude
