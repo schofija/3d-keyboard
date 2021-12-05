@@ -15,6 +15,8 @@
 #include <GL/glu.h>
 #include "glut.h"
 
+#include "glslprogram.h"
+
 
 //	This is a sample OpenGL / GLUT program
 //
@@ -200,6 +202,8 @@ float	Xrot, Yrot;				// rotation angles in degrees
 
 Curve Curves[NUMCURVES];		// if you are creating a pattern of curves
 Curve key;						// if you are not
+
+GLSLProgram *Pattern;
 
 // function prototypes:
 
@@ -750,6 +754,21 @@ InitGraphics( )
 		fprintf( stderr, "GLEW initialized OK\n" );
 	fprintf( stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 #endif
+
+	// do this *after* opening the window and init'ing glew:
+
+	Pattern = new GLSLProgram();
+	bool valid = Pattern->Create("pattern.vert", "pattern.frag");
+	if (!valid)
+	{
+		fprintf(stderr, "Shader cannot be created!\n");
+		DoMainMenu(QUIT);
+	}
+	else
+	{
+		fprintf(stderr, "Shader created.\n");
+	}
+	Pattern->SetVerbose(false);
 }
 
 
