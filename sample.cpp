@@ -38,7 +38,7 @@
 
 // title of these windows:
 
-const char *WINDOWTITLE = { "CS450 Final Project -- Jack Schofield" };
+const char *WINDOWTITLE = { "CS450 Final Project -- schofija" };
 const char *GLUITITLE   = { "User Interface Window" };
 
 // what the glui package defines as true and false:
@@ -521,6 +521,7 @@ Display( )
 
 			glPopMatrix();
 		}
+	}
 
 		//Special keys
 		// Tilde
@@ -576,7 +577,7 @@ Display( )
 					else{ glScalef(1.2, 1., 1.); }
 					glCallList(keylist);
 				glPopMatrix();
-	}		}
+			}		
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
