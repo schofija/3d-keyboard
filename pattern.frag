@@ -2,6 +2,7 @@
 
 uniform float	uTime;		// "Time", from Animate( )
 in vec2  	vST;		// texture coords
+uniform sampler2D uTexUnit;
 
 uniform float   uKa, uKd, uKs;	// coefficients of each type of lighting
 uniform vec3  uColor;			// object color
@@ -33,7 +34,10 @@ main( )
 		s = pow( max( dot(Eye,ref),0. ), uShininess );
 	}
 	vec3 specular = uKs * s * vec3(.8, .8, .8);
-	gl_FragColor = vec4( ambient + diffuse + specular,  1. );
+	
+	vec3 newcolor = texture(uTexUnit, vST).rgb;
+	gl_FragColor = vec4(newcolor + ambient + diffuse + specular, 1.);
+	//gl_FragColor = vec4( ambient + diffuse + specular,  1. );
 
 }
 

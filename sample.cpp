@@ -178,9 +178,9 @@ const float uKa	= .3;
 const float uKd	= .3;
 const float uKs	= .3;
 
-const float uColorR = .75;
-const float uColorG = .75;
-const float uColorB = .75;
+const float uColorR = .25;
+const float uColorG = .25;
+const float uColorB = .25;
 
 const float uSpecR = 1.;
 const float uSpecG = 1.;
@@ -222,12 +222,27 @@ float	Xrot, Yrot;				// rotation angles in degrees
 //Shaders
 	GLSLProgram *Pattern;
 
-//Animation
-bool keyPressed = false;
-bool keyReleased = false;
+//Key Animation
+	bool keyPressed = false;
+	bool keyReleased = false;
 
-int keyi;	//Index of key that was pressed (keys are stored as a 2D array)
-int keyj;
+	int keyi;	//Index of key that was pressed (keys are stored as a 2D array)
+	int keyj;
+
+//Textures
+GLuint texkey1, texkey2, texkey3, texkey4, texkey5, texkey6, texkey7, texkey8, texkey9, texkey0;
+GLuint keytextures[40];
+int width, height = 64;
+int level = 0;
+int ncomps = 3;
+int border = 0;
+
+//OsuSphere Globals (for debugging purposes)
+int		NumLngs, NumLats;
+struct point* Pts;
+int widthtest = 1024;
+int heighttest = 512;
+
 
 // function prototypes:
 
@@ -269,6 +284,7 @@ float			Dot(float [3], float [3]);
 float			Unit(float [3], float [3]);
 
 void	drawkey( struct Curve& ); // function to draw a key
+void	OsuSphere(float, int, int);
 
 
 // main program:
@@ -453,6 +469,10 @@ Display( )
 				Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
 				Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
 				Pattern->SetUniformVariable("uShininess", uShininess);
+
+				glActiveTexture(GL_TEXTURE6);                 // use texture unit 5
+				glBindTexture( GL_TEXTURE_2D, keytextures[i + j*10]);
+				Pattern->SetUniformVariable( "uTexUnit", 6 );   // tell your shader program you are using texture unit 5
 			
 					if(keyPressed && i == keyi && j == keyj)
 					{
@@ -464,7 +484,10 @@ Display( )
 						glTranslatef(0., 0., 0.);
 					}
 					glTranslatef(0.8 * i + (float(j) / 3), 0., 0.8 * j);
+
+					//OsuSphere(.3725, 10, 10);
 					glCallList( keylist );
+
 
 				Pattern->Use(0);
 
@@ -818,6 +841,74 @@ InitGraphics( )
 		fprintf(stderr, "Shader created.\n");
 	}
 	Pattern->SetVerbose(false);
+
+	unsigned char* tkey[41]{};
+
+	tkey[0] = BmpToTexture("textures/1.bmp", &width, &height);
+	tkey[1] = BmpToTexture("textures/2.bmp", &width, &height);
+	tkey[2] = BmpToTexture("textures/3.bmp", &width, &height);
+	tkey[3] = BmpToTexture("textures/4.bmp", &width, &height);
+	tkey[4] = BmpToTexture("textures/5.bmp", &width, &height);
+	tkey[5] = BmpToTexture("textures/6.bmp", &width, &height);
+	tkey[6] = BmpToTexture("textures/7.bmp", &width, &height);
+	tkey[7] = BmpToTexture("textures/8.bmp", &width, &height);
+	tkey[8] = BmpToTexture("textures/9.bmp", &width, &height);
+	tkey[9] = BmpToTexture("textures/0.bmp", &width, &height);
+	tkey[10] = BmpToTexture("textures/q.bmp", &width, &height);
+	tkey[11] = BmpToTexture("textures/w.bmp", &width, &height);
+	tkey[12] = BmpToTexture("textures/e.bmp", &width, &height);
+	tkey[13] = BmpToTexture("textures/r.bmp", &width, &height);
+	tkey[14] = BmpToTexture("textures/t.bmp", &width, &height);
+	tkey[15] = BmpToTexture("textures/y.bmp", &width, &height);
+	tkey[16] = BmpToTexture("textures/u.bmp", &width, &height);
+	tkey[17] = BmpToTexture("textures/i.bmp", &width, &height);
+	tkey[18] = BmpToTexture("textures/o.bmp", &width, &height);
+	tkey[19] = BmpToTexture("textures/p.bmp", &width, &height);
+	tkey[20] = BmpToTexture("textures/a.bmp", &width, &height);
+	tkey[21] = BmpToTexture("textures/s.bmp", &width, &height);
+	tkey[22] = BmpToTexture("textures/d.bmp", &width, &height);
+	tkey[23] = BmpToTexture("textures/f.bmp", &width, &height);
+	tkey[24] = BmpToTexture("textures/g.bmp", &width, &height);
+	tkey[25] = BmpToTexture("textures/h.bmp", &width, &height);
+	tkey[26] = BmpToTexture("textures/j.bmp", &width, &height);
+	tkey[27] = BmpToTexture("textures/k.bmp", &width, &height);
+	tkey[28] = BmpToTexture("textures/l.bmp", &width, &height);
+	tkey[29] = BmpToTexture("textures/semicolon.bmp", &width, &height);
+	tkey[30] = BmpToTexture("textures/z.bmp", &width, &height);
+	tkey[31] = BmpToTexture("textures/x.bmp", &width, &height);
+	tkey[32] = BmpToTexture("textures/c.bmp", &width, &height);
+
+	tkey[33] = BmpToTexture("textures/v.bmp", &width, &height); //These two are not working??
+	tkey[34] = BmpToTexture("textures/b.bmp", &width, &height);
+
+	tkey[35] = BmpToTexture("textures/n.bmp", &width, &height);
+	tkey[36] = BmpToTexture("textures/m.bmp", &width, &height);
+	tkey[37] = BmpToTexture("textures/comma.bmp", &width, &height);
+	tkey[38] = BmpToTexture("textures/period.bmp", &width, &height);
+	tkey[39] = BmpToTexture("textures/questionmark.bmp", &width, &height);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	for(int i = 0; i<40; i++)
+	{
+	glGenTextures(1, &keytextures[i]);
+
+		glBindTexture(GL_TEXTURE_2D, keytextures[i]);// make the Tex0 texture current and set its parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, tkey[i]);
+	}
+
+	//glGenTextures(1, &texkey2);
+
+	//	glBindTexture(GL_TEXTURE_2D, texkey2);// make the Tex0 texture current and set its parameters
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//	glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, tkey[1]);
 }
 
 
@@ -904,6 +995,11 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
+
+	case ESCAPE:
+		DoMainMenu(QUIT); // will not return here
+		break;			// happy compiler
+
 	case '1':
 		printf(" Key pressed \n ");
 		keyReleased = false;
@@ -967,6 +1063,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyi = 8;
 		keyj = 0;
 		break;
+
 	case '0':
 		printf(" Key pressed \n ");
 		keyReleased = false;
@@ -974,7 +1071,216 @@ Keyboard( unsigned char c, int x, int y )
 		keyi = 9;
 		keyj = 0;
 		break;
-
+	case 'q':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 0;
+		keyj = 1;
+		break;
+	case 'w':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 1;
+		keyj = 1;
+		break;
+	case 'e':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 2;
+		keyj = 1;
+		break;
+	case 'r':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 3;
+		keyj = 1;
+		break;
+	case 't':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 4;
+		keyj = 1;
+		break;
+	case 'y':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 5;
+		keyj = 1;
+		break;
+	case 'u':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 6;
+		keyj = 1;
+		break;
+	case 'i':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 7;
+		keyj = 1;
+		break;
+	case 'o':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 8;
+		keyj = 1;
+		break;
+	case 'p':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 9;
+		keyj = 1;
+		break;
+	case 'a':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 0;
+		keyj = 2;
+		break;
+	case 's':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 1;
+		keyj = 2;
+		break;
+	case 'd':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 2;
+		keyj = 2;
+		break;
+	case 'f':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 3;
+		keyj = 2;
+		break;
+	case 'g':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 4;
+		keyj = 2;
+		break;
+	case 'h':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 5;
+		keyj = 2;
+		break;
+	case 'j':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 6;
+		keyj = 2;
+		break;
+	case 'k':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 7;
+		keyj = 2;
+		break;
+	case 'l':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 8;
+		keyj = 2;
+		break;
+	case ';':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 9;
+		keyj = 2;
+		break;
+	case 'z':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 0;
+		keyj = 3;
+		break;
+	case 'x':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 1;
+		keyj = 3;
+		break;
+	case 'c':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 2;
+		keyj = 3;
+		break;
+	case 'v':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 3;
+		keyj = 3;
+		break;
+	case 'b':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 4;
+		keyj = 3;
+		break;
+	case 'n':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 5;
+		keyj = 3;
+		break;
+	case 'm':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 6;
+		keyj = 3;
+		break;
+	case ',':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 7;
+		keyj = 3;
+		break;
+	case '.':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 8;
+		keyj = 3;
+		break;
+	case '/':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 9;
+		keyj = 3;
+		break;
 
 		default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
@@ -1060,6 +1366,217 @@ void KbdUp(unsigned char key, int x, int y)
 			keyReleased = true;
 			keyi = 9;
 			keyj = 0;
+			break;
+
+		case 'q':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 0;
+			keyj = 1;
+			break;
+		case 'w':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 1;
+			keyj = 1;
+			break;
+		case 'e':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 2;
+			keyj = 1;
+			break;
+		case 'r':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 3;
+			keyj = 1;
+			break;
+		case 't':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 4;
+			keyj = 1;
+			break;
+		case 'y':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 5;
+			keyj = 1;
+			break;
+		case 'u':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 6;
+			keyj = 1;
+			break;
+		case 'i':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 7;
+			keyj = 1;
+			break;
+		case 'o':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 8;
+			keyj = 1;
+			break;
+		case 'p':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 9;
+			keyj = 1;
+			break;
+		case 'a':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 0;
+			keyj = 2;
+			break;
+		case 's':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 1;
+			keyj = 2;
+			break;
+		case 'd':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 2;
+			keyj = 2;
+			break;
+		case 'f':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 3;
+			keyj = 2;
+			break;
+		case 'g':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 4;
+			keyj = 2;
+			break;
+		case 'h':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 5;
+			keyj = 2;
+			break;
+		case 'j':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 6;
+			keyj = 2;
+			break;
+		case 'k':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 7;
+			keyj = 2;
+			break;
+		case 'l':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 8;
+			keyj = 2;
+			break;
+		case ';':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 9;
+			keyj = 2;
+			break;
+		case 'z':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 0;
+			keyj = 3;
+			break;
+		case 'x':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 1;
+			keyj = 3;
+			break;
+		case 'c':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 2;
+			keyj = 3;
+			break;
+		case 'v':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 3;
+			keyj = 3;
+			break;
+		case 'b':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 4;
+			keyj = 3;
+			break;
+		case 'n':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 5;
+			keyj = 3;
+			break;
+		case 'm':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 6;
+			keyj = 3;
+			break;
+		case ',':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 7;
+			keyj = 3;
+			break;
+		case '.':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 8;
+			keyj = 3;
+			break;
+		case '/':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 9;
+			keyj = 3;
 			break;
 
 	default:
@@ -1379,9 +1896,12 @@ void drawkey(struct Curve& k) {
 			float z = omt * omt * omt * k.p0.z + 3.f * t * omt * omt * k.p1.z + 3.f * t * t * omt * k.p2.z + t * t * t * k.p3.z;
 
 			glNormal3f(x, y, z);
+			
+			glTexCoord2f(x * 4/3, z + 1.);
 			glVertex3f(x, y, z);
 
 			glNormal3f(x, y, z + 0.75);
+			glTexCoord2f(x * 4/3, z);
 			glVertex3f(x, y, z + 0.75);
 		}
 	glEnd();
@@ -1788,4 +2308,136 @@ Unit(float vin[3], float vout[3])
 		vout[2] = vin[2];
 	}
 	return dist;
+}
+
+
+//************************
+// OsuSphere (debugging)
+//************************
+
+struct point
+{
+	float x, y, z;		// coordinates
+	float nx, ny, nz;	// surface normal
+	float s, t;		// texture coords
+};
+
+inline
+struct point*
+	PtsPointer(int lat, int lng)
+{
+	if (lat < 0)	lat += (NumLats - 1);
+	if (lng < 0)	lng += (NumLngs - 0);
+	if (lat > NumLats - 1)	lat -= (NumLats - 1);
+	if (lng > NumLngs - 1)	lng -= (NumLngs - 0);
+	return &Pts[NumLngs * lat + lng];
+}
+
+inline
+void
+DrawPoint(struct point* p)
+{
+	glNormal3fv(&p->nx);
+	glTexCoord2fv(&p->s);
+	glVertex3fv(&p->x);
+}
+
+void
+OsuSphere(float radius, int slices, int stacks)
+{
+	// set the globals:
+
+	NumLngs = slices;
+	NumLats = stacks;
+	if (NumLngs < 3)
+		NumLngs = 3;
+	if (NumLats < 3)
+		NumLats = 3;
+
+	// allocate the point data structure:
+
+	Pts = new struct point[NumLngs * NumLats];
+
+	// fill the Pts structure:
+
+	for (int ilat = 0; ilat < NumLats; ilat++)
+	{
+		float lat = -M_PI / 2. + M_PI * (float)ilat / (float)(NumLats - 1);	// ilat=0/lat=0. is the south pole
+											// ilat=NumLats-1, lat=+M_PI/2. is the north pole
+		float xz = cosf(lat);
+		float  y = sinf(lat);
+		for (int ilng = 0; ilng < NumLngs; ilng++)				// ilng=0, lng=-M_PI and
+											// ilng=NumLngs-1, lng=+M_PI are the same meridian
+		{
+			float lng = -M_PI + 2. * M_PI * (float)ilng / (float)(NumLngs - 1);
+			float x = xz * cosf(lng);
+			float z = -xz * sinf(lng);
+			struct point* p = PtsPointer(ilat, ilng);
+			p->x = radius * x;
+			p->y = radius * y;
+			p->z = radius * z;
+			p->nx = x;
+			p->ny = y;
+			p->nz = z;
+			p->s = (lng + M_PI) / (2. * M_PI);
+			p->t = (lat + M_PI / 2.) / M_PI;
+		}
+	}
+
+	struct point top, bot;		// top, bottom points
+
+	top.x = 0.;		top.y = radius;	top.z = 0.;
+	top.nx = 0.;		top.ny = 1.;		top.nz = 0.;
+	top.s = 0.;		top.t = 1.;
+
+	bot.x = 0.;		bot.y = -radius;	bot.z = 0.;
+	bot.nx = 0.;		bot.ny = -1.;		bot.nz = 0.;
+	bot.s = 0.;		bot.t = 0.;
+
+	// connect the north pole to the latitude NumLats-2:
+
+	glBegin(GL_TRIANGLE_STRIP);
+	for (int ilng = 0; ilng < NumLngs; ilng++)
+	{
+		float lng = -M_PI + 2. * M_PI * (float)ilng / (float)(NumLngs - 1);
+		top.s = (lng + M_PI) / (2. * M_PI);
+		DrawPoint(&top);
+		struct point* p = PtsPointer(NumLats - 2, ilng);	// ilat=NumLats-1 is the north pole
+		DrawPoint(p);
+	}
+	glEnd();
+
+	// connect the south pole to the latitude 1:
+
+	glBegin(GL_TRIANGLE_STRIP);
+	for (int ilng = NumLngs - 1; ilng >= 0; ilng--)
+	{
+		float lng = -M_PI + 2. * M_PI * (float)ilng / (float)(NumLngs - 1);
+		bot.s = (lng + M_PI) / (2. * M_PI);
+		DrawPoint(&bot);
+		struct point* p = PtsPointer(1, ilng);					// ilat=0 is the south pole
+		DrawPoint(p);
+	}
+	glEnd();
+
+	// connect the horizontal strips:
+
+	for (int ilat = 2; ilat < NumLats - 1; ilat++)
+	{
+		struct point* p;
+		glBegin(GL_TRIANGLE_STRIP);
+		for (int ilng = 0; ilng < NumLngs; ilng++)
+		{
+			p = PtsPointer(ilat, ilng);
+			DrawPoint(p);
+			p = PtsPointer(ilat - 1, ilng);
+			DrawPoint(p);
+		}
+		glEnd();
+	}
+
+	// clean-up:
+
+	delete[] Pts;
+	Pts = NULL;
 }

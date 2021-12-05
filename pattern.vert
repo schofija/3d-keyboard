@@ -17,6 +17,8 @@ const float W = 	2.;		// frequency
 void
 main( )
 { 
+	vST = gl_MultiTexCoord0.st;
+
 	vec3 vert = gl_Vertex.xyz;
 	vec4 ECposition = gl_ModelViewMatrix * vec4( vert, 1. );
 	vN = normalize( gl_NormalMatrix * gl_Normal );				// normal vector
