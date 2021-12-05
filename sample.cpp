@@ -215,10 +215,19 @@ int		WhichProjection;		// ORTHO or PERSP
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 
-Curve Curves[NUMCURVES];		// if you are creating a pattern of curves
-Curve key;						// if you are not
+//Bezier curves
+	Curve Curves[NUMCURVES];		// if you are creating a pattern of curves
+	Curve key;						// if you are not
 
-GLSLProgram *Pattern;
+//Shaders
+	GLSLProgram *Pattern;
+
+//Animation
+bool keyPressed = false;
+bool keyReleased = false;
+
+int keyi;	//Index of key that was pressed (keys are stored as a 2D array)
+int keyj;
 
 // function prototypes:
 
@@ -384,7 +393,8 @@ Display( )
 
 	// set the eye position, look-at position, and up-vector:
 
-	gluLookAt( 0., 0., 3.,     0., 0., 0.,     0., 1., 0. );
+	//gluLookAt( 0., 0., 3.,     0., 0., 0.,     0., 1., 0. );
+	gluLookAt(5., 6., 5.,		5., 0., 0.,		0., 1., 0.);
 
 	// rotate the scene:
 
@@ -431,7 +441,7 @@ Display( )
 	//glCallList( BoxList );
 	for(int j = 0; j < 4; j++)
 	{
-		for(int i = -5; i < 5; i++)
+		for(int i = 0; i < 10; i++)
 		{
 			glPushMatrix();
 
@@ -444,7 +454,15 @@ Display( )
 				Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
 				Pattern->SetUniformVariable("uShininess", uShininess);
 			
+					if(keyPressed && i == keyi && j == keyj)
+					{
+						glTranslatef(0., -0.75, 0.);
+					}
 
+					if(keyReleased && i == keyi && j == keyj)
+					{
+						glTranslatef(0., 0., 0.);
+					}
 					glTranslatef(0.8 * i + (float(j) / 3), 0., 0.8 * j);
 					glCallList( keylist );
 
@@ -753,6 +771,7 @@ InitGraphics( )
 
 	glutKeyboardFunc( Keyboard );
 	glutKeyboardUpFunc( KbdUp );
+	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF); //Repeat inputs off (not constantly repeating inputs if a key is held down)
 
 	glutMouseFunc( MouseButton );
 	glutMotionFunc( MouseMotion );
@@ -770,7 +789,7 @@ InitGraphics( )
 	glutTabletButtonFunc( NULL );
 	glutMenuStateFunc( NULL );
 	glutTimerFunc( -1, NULL, 0 );
-	glutIdleFunc( NULL );
+	glutIdleFunc( Animate );
 
 	// init glew (a window must be open to do this):
 
@@ -876,7 +895,7 @@ InitLists( )
 
 
 // the keyboard callback:
-
+// for keyPRESSES (down)
 void
 Keyboard( unsigned char c, int x, int y )
 {
@@ -885,24 +904,77 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
-	case 'a':
+	case '1':
 		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 0;
+		keyj = 0;
 		break;
-		case 'o':
-		case 'O':
-			WhichProjection = ORTHO;
-			break;
+	case '2':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 1;
+		keyj = 0;
+		break;
+	case '3':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 2;
+		keyj = 0;
+		break;
+	case '4':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 3;
+		keyj = 0;
+		break;
+	case '5':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 4;
+		keyj = 0;
+		break;
+	case '6':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 5;
+		keyj = 0;
+		break;
+	case '7':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 6;
+		keyj = 0;
+		break;
+	case '8':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 7;
+		keyj = 0;
+		break;
+	case '9':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 8;
+		keyj = 0;
+		break;
+	case '0':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = 9;
+		keyj = 0;
+		break;
 
-		case 'p':
-		case 'P':
-			WhichProjection = PERSP;
-			break;
-
-		case 'q':
-		case 'Q':
-		case ESCAPE:
-			DoMainMenu( QUIT );	// will not return here
-			break;				// happy compiler
 
 		default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
@@ -914,29 +986,81 @@ Keyboard( unsigned char c, int x, int y )
 	glutPostRedisplay( );
 }
 
+// keyboard callback for key RELEASES
 void KbdUp(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-		case 'a':
+		case '1':
 			printf( " Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 0;
+			keyj = 0;
 			break;
-		
-		case 'o':
-		case 'O':
-			WhichProjection = ORTHO;
+		case '2':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 1;
+			keyj = 0;
 			break;
-
-		case 'p':
-		case 'P':
-			WhichProjection = PERSP;
+		case '3':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 2;
+			keyj = 0;
 			break;
-
-		case 'q':
-		case 'Q':
-		case ESCAPE:
-			DoMainMenu(QUIT);	// will not return here
-			break;				// happy compiler
+		case '4':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 3;
+			keyj = 0;
+			break;
+		case '5':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 4;
+			keyj = 0;
+			break;
+		case '6':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 5;
+			keyj = 0;
+			break;
+		case '7':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 6;
+			keyj = 0;
+			break;
+		case '8':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 7;
+			keyj = 0;
+			break;
+		case '9':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 8;
+			keyj = 0;
+			break;
+		case '0':
+			printf(" Key released \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = 9;
+			keyj = 0;
+			break;
 
 	default:
 		fprintf(stderr, "Don't know what to do with keyboard hit: '%key' (0x%0x)\n", key, key);
