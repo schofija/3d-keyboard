@@ -237,6 +237,9 @@ float	Xrot, Yrot;				// rotation angles in degrees
 	int keyj;	//Indexing for main set of keys
 
 	int mod;	//Used for modifier key state(shift,ctrl,alt)
+	bool shift = false;		//Modifier flags
+	bool alt = false;
+	bool ctrl = false;
 
 //Textures
 	GLuint keytextures[47];		//array of textures for each keycap [standard keycap size]
@@ -507,33 +510,22 @@ Display( )
 		dtkey(11, 1, 1., keytextures, 44, -1, 6);	//[{
 		dtkey(12, 1, 1.55, keytextures2, 2, -1, 7);	//line
 
+		if(shift == false)
+		{
 		dtkey(-1, 2, 1.9, keytextures2, 3, -1, 8);	//capslk
-		dtkey(10, 2, 1., keytextures, 45, -1, 9);	//"
-		dtkey(11, 2, 2.2, keytextures2, 4, -1, 10); //enter
+		}
+		else
+		{
+			dtkey(-1, 2, 1.9, keytextures2, 4, -1, 8);	//capslk
+		}
 
-		dtkey(-1, 3, 2.35, keytextures2, 5, -1, 11); //Lshift
-		dtkey(10, 3, 2.8, keytextures2, 5, -1, 12); //Rshift
+		dtkey(10, 2, 1., keytextures, 45, -1, 9);	//"
+		dtkey(11, 2, 2.2, keytextures2, 5, -1, 10); //enter
+
+		dtkey(-1, 3, 2.35, keytextures2, 6, -1, 11); //Lshift
+		dtkey(10, 3, 2.8, keytextures2, 6, -1, 12); //Rshift
 
 		// Bottom-row
-
-			for(int i = 0; i < 8; i++)
-			{
-				glPushMatrix();
-					if(i<=3)
-					{
-						glTranslatef(-.8 + i * .96, 0., 3.2);
-					}
-
-					else{ glTranslatef(-.8 + i * .96 + 3.9, 0., 3.2); }
-					
-					if(i == 3)
-					{
-						glScalef(6.3, 1., 1.);
-					}
-					else{ glScalef(1.2, 1., 1.); }
-					glCallList(keylist);
-				glPopMatrix();
-			}		
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
@@ -947,10 +939,12 @@ InitGraphics( )
 	tkey2w[2] = width2;
 	tkey2[3] = BmpToTexture("textures/s/caps.bmp", &width2, &height);
 	tkey2w[3] = width2;
-	tkey2[4] = BmpToTexture("textures/s/enter.bmp", &width3, &height);
-	tkey2w[4] = width3;
-	tkey2[5] = BmpToTexture("textures/s/shift.bmp", &width3, &height);
+	tkey2[4] = BmpToTexture("textures/s/capson.bmp", &width2, &height);
+	tkey2w[4] = width2;
+	tkey2[5] = BmpToTexture("textures/s/enter.bmp", &width3, &height);
 	tkey2w[5] = width3;
+	tkey2[6] = BmpToTexture("textures/s/shift.bmp", &width3, &height);
+	tkey2w[6] = width3;
 	
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -1228,6 +1222,14 @@ Keyboard( unsigned char c, int x, int y )
 	if( DebugOn != 0 )
 		fprintf( stderr, "Keyboard: '%c' (0x%0x)\n", c, c );
 
+	//Special modifiers
+	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
+	{
+		printf("SHIFT ACTIVE");
+		shift = true;
+	}
+	else { shift = false; }
+
 	switch( c )
 	{
 
@@ -1236,6 +1238,7 @@ Keyboard( unsigned char c, int x, int y )
 		break;			// happy compiler
 
 	case '1':
+	case '!':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1243,6 +1246,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case '2':
+	case '@':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1250,6 +1254,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case '3':
+	case '#':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1257,6 +1262,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case '4':
+	case '$':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1264,6 +1270,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case '5':
+	case '%':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1271,6 +1278,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case '6':
+	case '^':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1278,6 +1286,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case '7':
+	case '&':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1285,6 +1294,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case '8':
+	case '*':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1292,6 +1302,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case '9':
+	case '(':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1300,6 +1311,7 @@ Keyboard( unsigned char c, int x, int y )
 		break;
 
 	case '0':
+	case ')':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1307,6 +1319,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case 'q':
+	case 'Q':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1314,6 +1327,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 'w':
+	case 'W':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1321,6 +1335,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 'e':
+	case 'E':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1328,6 +1343,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 'r':
+	case 'R':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1335,6 +1351,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 't':
+	case 'T':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1342,6 +1359,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 'y':
+	case 'Y':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1349,6 +1367,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 'u':
+	case 'U':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1356,6 +1375,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 'i':
+	case 'I':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1363,6 +1383,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 'o':
+	case 'O':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1370,6 +1391,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 'p':
+	case 'P':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1377,6 +1399,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case 'a':
+	case 'A':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1384,6 +1407,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case 's':
+	case 'S':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1391,6 +1415,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case 'd':
+	case 'D':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1398,6 +1423,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case 'f':
+	case 'F':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1405,6 +1431,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case 'g':
+	case 'G':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1412,6 +1439,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case 'h':
+	case 'H':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1419,6 +1447,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case 'j':
+	case 'J':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1426,6 +1455,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case 'k':
+	case 'K':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1433,6 +1463,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case 'l':
+	case 'L':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1440,6 +1471,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case ';':
+	case ':':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1447,6 +1479,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 2;
 		break;
 	case 'z':
+	case 'Z':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1454,6 +1487,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 	case 'x':
+	case 'X':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1461,6 +1495,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 	case 'c':
+	case 'C':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1468,6 +1503,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 	case 'v':
+	case 'V':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1475,6 +1511,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 	case 'b':
+	case 'B':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1482,6 +1519,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 	case 'n':
+	case 'N':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1489,6 +1527,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 	case 'm':
+	case 'M':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1496,6 +1535,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 	case ',':
+	case '<':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1503,6 +1543,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 	case '.':
+	case '>':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1510,6 +1551,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 	case '/':
+	case '?':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1519,6 +1561,7 @@ Keyboard( unsigned char c, int x, int y )
 
 	//special chars!
 	case '`':
+	case '~':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1526,6 +1569,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 0;
 		break;
 	case '-':
+	case '_':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1533,6 +1577,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 1;
 		break;
 	case '=':
+	case '+':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1554,6 +1599,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 4;
 		break;
 	case 91:
+	case '{':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1561,6 +1607,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 5;
 		break;
 	case 93:
+	case '}':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1568,6 +1615,7 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 6;
 		break;
 	case 92:
+	case '|':
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1576,6 +1624,7 @@ Keyboard( unsigned char c, int x, int y )
 		break;
 
 	case 39:
+	case 34:
 		printf(" Key pressed \n ");
 		keyReleased = false;
 		keyPressed = true;
@@ -1605,6 +1654,13 @@ Keyboard( unsigned char c, int x, int y )
 // keyboard callback for key RELEASES
 void KbdUp(unsigned char key, int x, int y)
 {
+	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
+	{
+		printf("SHIFT ACTIVE");
+		shift = true;
+	}
+	else { shift = false; }
+
 	switch (key)
 	{
 	case ESCAPE:
@@ -1612,6 +1668,7 @@ void KbdUp(unsigned char key, int x, int y)
 		break;			// happy compiler
 
 		case '1':
+		case '!':
 			printf( " Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1619,6 +1676,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '2':
+		case '@':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1626,6 +1684,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '3':
+		case '#':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1633,6 +1692,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '4':
+		case '$':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1640,6 +1700,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '5':
+		case '%':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1647,6 +1708,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '6':
+		case '^':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1654,6 +1716,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '7':
+		case '&':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1661,6 +1724,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '8':
+		case '*':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1668,6 +1732,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '9':
+		case '(':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1675,6 +1740,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '0':
+		case ')':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1683,6 +1749,7 @@ void KbdUp(unsigned char key, int x, int y)
 			break;
 
 		case 'q':
+		case 'Q':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1690,6 +1757,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 'w':
+		case 'W':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1697,6 +1765,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 'e':
+		case 'E':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1704,6 +1773,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 'r':
+		case 'R':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1711,6 +1781,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 't':
+		case 'T':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1718,6 +1789,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 'y':
+		case 'Y':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1725,6 +1797,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 'u':
+		case 'U':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1732,6 +1805,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 'i':
+		case 'I':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1739,6 +1813,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 'o':
+		case 'O':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1746,6 +1821,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 'p':
+		case 'P':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1753,6 +1829,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case 'a':
+		case 'A':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1760,6 +1837,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case 's':
+		case 'S':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1767,6 +1845,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case 'd':
+		case 'D':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1774,6 +1853,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case 'f':
+		case 'F':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1781,6 +1861,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case 'g':
+		case 'G':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1788,6 +1869,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case 'h':
+		case 'H':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1795,6 +1877,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case 'j':
+		case 'J':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1802,6 +1885,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case 'k':
+		case 'K':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1809,6 +1893,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case 'l':
+		case 'L':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1816,6 +1901,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case ';':
+		case ':':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1823,6 +1909,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 2;
 			break;
 		case 'z':
+		case 'Z':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1830,6 +1917,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 3;
 			break;
 		case 'x':
+		case 'X':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1837,6 +1925,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 3;
 			break;
 		case 'c':
+		case 'C':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1844,6 +1933,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 3;
 			break;
 		case 'v':
+		case 'V':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1851,6 +1941,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 3;
 			break;
 		case 'b':
+		case 'B':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1858,6 +1949,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 3;
 			break;
 		case 'n':
+		case 'N':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1865,6 +1957,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 3;
 			break;
 		case 'm':
+		case 'M':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1872,6 +1965,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 3;
 			break;
 		case ',':
+		case '<':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1879,6 +1973,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 3;
 			break;
 		case '.':
+		case '>':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1886,6 +1981,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 3;
 			break;
 		case '/':
+		case '?':
 			printf(" Key released \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1895,6 +1991,7 @@ void KbdUp(unsigned char key, int x, int y)
 
 		//special chars!
 		case '`':
+		case '~':
 			printf(" Key pressed \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1902,6 +1999,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 0;
 			break;
 		case '-':
+		case '_':
 			printf(" Key pressed \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1909,6 +2007,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 1;
 			break;
 		case '=':
+		case '+':
 			printf(" Key pressed \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1930,6 +2029,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 4;
 			break;
 		case 91:
+		case '{':
 			printf(" Key pressed \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1937,6 +2037,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 5;
 			break;
 		case 93:
+		case '}':
 			printf(" Key pressed \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1944,6 +2045,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 6;
 			break;
 		case 92:
+		case '|':
 			printf(" Key pressed \n ");
 			keyPressed = false;
 			keyReleased = true;
@@ -1951,6 +2053,7 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 7;
 			break;
 		case 39:
+		case 34:
 			printf(" Key pressed \n ");
 			keyPressed = false;
 			keyReleased = true;
