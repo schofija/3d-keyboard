@@ -190,7 +190,7 @@ const float uShininess		= 1.;
 // Keyboard case 
 const float CASE_THICKNESS = 0.2;
 const float CASE_LENGTH = 4.6;
-const float CASE_WIDTH = 12.;
+const float CASE_WIDTH = 12.3;
 const float CASE_HEIGHT = 0.75;
 
 
@@ -236,11 +236,11 @@ float	Xrot, Yrot;				// rotation angles in degrees
 	int keyi;	//Indexing for main set of keys
 	int keyj;	//Indexing for main set of keys
 
-	int keys;	//Indexing for special keys (keys outside of main set)
+	int mod;	//Used for modifier key state(shift,ctrl,alt)
 
 //Textures
-	GLuint keytextures[46];		//array of textures for each keycap [standard keycap size]
-	GLuint keytextures2[20];	//second array for special keys
+	GLuint keytextures[47];		//array of textures for each keycap [standard keycap size]
+	GLuint keytextures2[16];	//second array for special keys
 	int width, height = 64;
 	int width2 = 96;	//For 1.25x, 1.5x keys
 	int width3 = 128;	//For 2x keys and longer
@@ -497,48 +497,23 @@ Display( )
 		}
 	}
 
-		// Tilde
-		//dtkey(-1, 0, 1., keytextures, 40);
+		dtkey(-1, 0, 1., keytextures, 40, -1, 0);	//~
+		dtkey(10, 0, 1., keytextures, 41, -1, 1);	//-
+		dtkey(11, 0, 1., keytextures, 42, -1, 2);	//+
+		dtkey(12, 0, 2., keytextures2, 0, -1, 3);	//backspace
 
-		// Minus
-		//dtkey(8, 0, 1., keytextures, 41);
+		dtkey(-1, 1, 1.45, keytextures2, 1, -1, 4);	//tab
+		dtkey(10, 1, 1., keytextures, 43, -1, 5);	//[{
+		dtkey(11, 1, 1., keytextures, 44, -1, 6);	//[{
+		dtkey(12, 1, 1.55, keytextures2, 2, -1, 7);	//line
 
+		dtkey(-1, 2, 1.9, keytextures2, 3, -1, 8);	//capslk
+		dtkey(10, 2, 1., keytextures, 45, -1, 9);	//"
+		dtkey(11, 2, 2.2, keytextures2, 4, -1, 10); //enter
 
-		//Backspace
-		glPushMatrix();
-			glTranslatef(9.6, 0., 0.);
-			glScalef(2., 1., 1.); //backspace is 2 unit
-			glCallList(keylist);
-		glPopMatrix();
+		dtkey(-1, 3, 2.35, keytextures2, 5, -1, 11); //Lshift
+		dtkey(10, 3, 2.8, keytextures2, 5, -1, 12); //Rshift
 
-		//Tab
-		glPushMatrix();
-			glTranslatef(-.8, 0., 0.8);
-			glScalef(1.45, 1., 1.);
-			glCallList(keylist);
-		glPopMatrix();
-
-		//Caps-lock
-		glPushMatrix();
-			glTranslatef(-.8, 0., 1.6);
-			glScalef(1.9, 1., 1.);
-			glCallList(keylist);
-		glPopMatrix();
-
-		//Left-shift
-		glPushMatrix();
-			glTranslatef(-.8, 0., 2.4);
-			glScalef(2.3, 1., 1.);
-			glCallList(keylist);
-		glPopMatrix();
-
-		//Right-shift
-		glPushMatrix();
-		glTranslatef(.8*10 + 1, 0., 2.4);
-		glScalef(2.3, 1., 1.);
-			glCallList(keylist);
-		glPopMatrix();
-		
 		// Bottom-row
 
 			for(int i = 0; i < 8; i++)
@@ -910,8 +885,9 @@ InitGraphics( )
 	}
 	Pattern->SetVerbose(false);
 
-	unsigned char* tkey[46]{};	//main keys
+	unsigned char* tkey[47]{};	//main keys
 	unsigned char* tkey2[20]{}; //special keys
+	int	tkey2w[20]{}; //holds width values
 
 	//Main keys
 	tkey[0] = BmpToTexture("textures/1.bmp", &width, &height);
@@ -960,18 +936,26 @@ InitGraphics( )
 	tkey[43] = BmpToTexture("textures/s/openbracket.bmp", &width, &height);
 	tkey[44] = BmpToTexture("textures/s/closedbracket.bmp", &width, &height);
 	tkey[45] = BmpToTexture("textures/s/quote.bmp", &width, &height);
+	tkey[46] = BmpToTexture("textures/s/blank.bmp", &width, &height);
 
-	//Extra keys
-	tkey2[0] = BmpToTexture("textures/s/tilde.bmp", &width, &height);
-	tkey2[1] = BmpToTexture("textures/s/tab.bmp", &width3, &height);
-	tkey2[2] = BmpToTexture("textures/s/caps.bmp", &width3, &height);
-	tkey2[3] = BmpToTexture("textures/s/shift.bmp", &width3, &height);
-
-
+	//Special width keys
+	tkey2[0] = BmpToTexture("textures/s/backspace.bmp", &width3, &height);
+	tkey2w[0] = width3;
+	tkey2[1] = BmpToTexture("textures/s/tab.bmp", &width2, &height);
+	tkey2w[1] = width2;
+	tkey2[2] = BmpToTexture("textures/s/line.bmp", &width2, &height);
+	tkey2w[2] = width2;
+	tkey2[3] = BmpToTexture("textures/s/caps.bmp", &width2, &height);
+	tkey2w[3] = width2;
+	tkey2[4] = BmpToTexture("textures/s/enter.bmp", &width3, &height);
+	tkey2w[4] = width3;
+	tkey2[5] = BmpToTexture("textures/s/shift.bmp", &width3, &height);
+	tkey2w[5] = width3;
+	
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	for(int i = 0; i<46; i++)
+	for(int i = 0; i<47; i++)
 	{
 	glGenTextures(1, &keytextures[i]);
 
@@ -983,14 +967,17 @@ InitGraphics( )
 		glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, tkey[i]);
 	}
 
-	//glGenTextures(1, &texkey2);
+	for(int i = 0; i < 15; i++)
+	{
+	glGenTextures(1, &keytextures2[i]);
 
-	//	glBindTexture(GL_TEXTURE_2D, texkey2);// make the Tex0 texture current and set its parameters
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//	glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, tkey[1]);
+		glBindTexture(GL_TEXTURE_2D, keytextures2[i]);// make the Tex0 texture current and set its parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, 3, tkey2w[i], height, 0, GL_RGB, GL_UNSIGNED_BYTE, tkey2[i]);
+	}
 }
 
 
@@ -1530,8 +1517,83 @@ Keyboard( unsigned char c, int x, int y )
 		keyj = 3;
 		break;
 
-		default:
+	//special chars!
+	case '`':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 0;
+		break;
+	case '-':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 1;
+		break;
+	case '=':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 2;
+		break;
+	case 8:
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 3;
+		break;
+	case 9:
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 4;
+		break;
+	case 91:
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 5;
+		break;
+	case 93:
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 6;
+		break;
+	case 92:
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 7;
+		break;
+
+	case 39:
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 9;
+		break;
+
+	case 13:
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 10;
+		break;
+
+	default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
+
 	}
 
 	// force a call to Display( ):
@@ -1829,6 +1891,78 @@ void KbdUp(unsigned char key, int x, int y)
 			keyReleased = true;
 			keyi = 9;
 			keyj = 3;
+			break;
+
+		//special chars!
+		case '`':
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 0;
+			break;
+		case '-':
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 1;
+			break;
+		case '=':
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 2;
+			break;
+		case 8:
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 3;
+			break;
+		case 9:
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 4;
+			break;
+		case 91:
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 5;
+			break;
+		case 93:
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 6;
+			break;
+		case 92:
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 7;
+			break;
+		case 39:
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 9;
+			break;
+		case 13:
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 10;
 			break;
 
 	default:
@@ -2215,7 +2349,7 @@ void	dtkey(int i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
 
 		glPushMatrix();
 
-		glTranslatef(0.8 * i + (float(j) / 3), 0., 0.8 * j);
+		glTranslatef(0.8 * float(i) + (float(j) / 3), 0., 0.8 * float(j));
 
 		if (keyPressed && k1 == keyi && k2 == keyj)
 		{
@@ -2226,6 +2360,16 @@ void	dtkey(int i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
 		if (keyReleased && k1 == keyi && k2 == keyj)
 		{
 			glTranslatef(0., 0., 0.);
+		}
+		
+		if(i >= 0)
+		{
+			glScalef(w, 1., 1.);
+		}
+		else
+		{
+			glTranslatef(-w*.75 + .75, 0., 0.); //This works lol. For keys to the left of my 0 index with non-standard spacing (tab, capslk, lshift, etc)
+			glScalef(w, 1., 1.);
 		}
 
 		Pattern->Use();
