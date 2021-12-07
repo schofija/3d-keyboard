@@ -298,7 +298,7 @@ float			Unit(float [3], float [3]);
 
 void	drawkey( struct Curve& ); // function to draw a key
 
-void	dtkey(int, int, float, GLuint*, int); //Parameters: collumn, row, width, texture array, index						
+void	dtkey(int, int, float, GLuint*, int, int, int); //Parameters: collumn, row, width, texture array, index, keyi, keyj				
 		
 void	OsuSphere(float, int, int);
 
@@ -493,43 +493,16 @@ Display( )
 	{
 		for(int i = 0; i < 10; i++)
 		{
-			glPushMatrix();
-
-			if (keyPressed && i == keyi && j == keyj)
-			{
-				//glTranslatef(0., -0.75, 0.); // originale
-				glTranslatef(0., -0.5, 0.);
-			}
-
-			if (keyReleased && i == keyi && j == keyj)
-			{
-				glTranslatef(0., 0., 0.);
-			}
-
-				dtkey(i, j, 1., keytextures, i + j*10);
-
-			glPopMatrix();
+				dtkey(i, j, 1., keytextures, i + j*10, i, j);
 		}
 	}
 
-		//Special keys
 		// Tilde
-		//glPushMatrix();
-			//glTranslatef(-.8, 0., 0.);
-			//glCallList(keylist);
-			dtkey(-1, 0, 1., keytextures, 40);
-		//glPopMatrix();
+		//dtkey(-1, 0, 1., keytextures, 40);
 
 		// Minus
-		//glPushMatrix();
-		//	glTranslatef(8., 0., 0.);
-		//	glCallList(keylist);
-		//glPopMatrix();
-		//Plus
-		glPushMatrix();
-		glTranslatef(8.8, 0., 0.);
-		glCallList(keylist);
-		glPopMatrix();
+		//dtkey(8, 0, 1., keytextures, 41);
+
 
 		//Backspace
 		glPushMatrix();
@@ -2238,9 +2211,22 @@ void drawkey(struct Curve& k) {
 	glEnd();
 }
 
-void	dtkey(int i, int j, float w, GLuint* kt, int idx) {
+void	dtkey(int i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
 
-	glTranslatef(0.8 * i + (float(j) / 3), 0., 0.8 * j);
+		glPushMatrix();
+
+		glTranslatef(0.8 * i + (float(j) / 3), 0., 0.8 * j);
+
+		if (keyPressed && k1 == keyi && k2 == keyj)
+		{
+			//glTranslatef(0., -0.75, 0.); // originale
+			glTranslatef(0., -0.5, 0.);
+		}
+
+		if (keyReleased && k1 == keyi && k2 == keyj)
+		{
+			glTranslatef(0., 0., 0.);
+		}
 
 		Pattern->Use();
 		Pattern->SetUniformVariable("uTime", Time);
@@ -2258,6 +2244,8 @@ void	dtkey(int i, int j, float w, GLuint* kt, int idx) {
 		glCallList(keylist);
 
 	Pattern->Use(0);
+
+		glPopMatrix();
 }
 
 // read a BMP file into a Texture:
