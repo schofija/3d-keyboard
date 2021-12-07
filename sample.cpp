@@ -34,7 +34,7 @@
 //		6. The transformations to be reset
 //		7. The program to quit
 //
-//	Author:			Joe Graphics
+//	Author:			Jack Schofield
 
 // title of these windows:
 
@@ -233,16 +233,20 @@ float	Xrot, Yrot;				// rotation angles in degrees
 	bool keyPressed = false;
 	bool keyReleased = false;
 
-	int keyi;	//Index of key that was pressed (keys are stored as a 2D array)
-	int keyj;
+	int keyi;	//Indexing for main set of keys
+	int keyj;	//Indexing for main set of keys
+
+	int keys;	//Indexing for special keys (keys outside of main set)
 
 //Textures
-GLuint texkey1, texkey2, texkey3, texkey4, texkey5, texkey6, texkey7, texkey8, texkey9, texkey0;
-GLuint keytextures[40];
-int width, height = 64;
-int level = 0;
-int ncomps = 3;
-int border = 0;
+	GLuint keytextures[46];		//array of textures for each keycap [standard keycap size]
+	GLuint keytextures2[20];	//second array for special keys
+	int width, height = 64;
+	int width2 = 96;	//For 1.25x, 1.5x keys
+	int width3 = 128;	//For 2x keys and longer
+	int level = 0;
+	int ncomps = 3;
+	int border = 0;
 
 //OsuSphere Globals (for debugging purposes)
 int		NumLngs, NumLats;
@@ -293,6 +297,9 @@ float			Dot(float [3], float [3]);
 float			Unit(float [3], float [3]);
 
 void	drawkey( struct Curve& ); // function to draw a key
+
+void	dtkey(int, int, float, GLuint*, int); //Parameters: collumn, row, width, texture array, index						
+		
 void	OsuSphere(float, int, int);
 
 
@@ -488,36 +495,18 @@ Display( )
 		{
 			glPushMatrix();
 
-				Pattern->Use();
-				Pattern->SetUniformVariable("uTime", Time);
-				Pattern->SetUniformVariable("uKa", uKa );
-				Pattern->SetUniformVariable("uKd", uKd);
-				Pattern->SetUniformVariable("uKs", uKs);
-				Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
-				Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
-				Pattern->SetUniformVariable("uShininess", uShininess);
+			if (keyPressed && i == keyi && j == keyj)
+			{
+				//glTranslatef(0., -0.75, 0.); // originale
+				glTranslatef(0., -0.5, 0.);
+			}
 
-				glActiveTexture(GL_TEXTURE6);                 // use texture unit 5
-				glBindTexture( GL_TEXTURE_2D, keytextures[i + j*10]);
-				Pattern->SetUniformVariable( "uTexUnit", 6 );   // tell your shader program you are using texture unit 5
-			
-					if(keyPressed && i == keyi && j == keyj)
-					{
-						//glTranslatef(0., -0.75, 0.); // originale
-						glTranslatef(0., -0.5, 0.);
-					}
+			if (keyReleased && i == keyi && j == keyj)
+			{
+				glTranslatef(0., 0., 0.);
+			}
 
-					if(keyReleased && i == keyi && j == keyj)
-					{
-						glTranslatef(0., 0., 0.);
-					}
-					glTranslatef(0.8 * i + (float(j) / 3), 0., 0.8 * j);
-
-					//OsuSphere(.3725, 10, 10);
-					glCallList( keylist );
-
-
-				Pattern->Use(0);
+				dtkey(i, j, 1., keytextures, i + j*10);
 
 			glPopMatrix();
 		}
@@ -525,8 +514,27 @@ Display( )
 
 		//Special keys
 		// Tilde
+		//glPushMatrix();
+			//glTranslatef(-.8, 0., 0.);
+			//glCallList(keylist);
+			dtkey(-1, 0, 1., keytextures, 40);
+		//glPopMatrix();
+
+		// Minus
+		//glPushMatrix();
+		//	glTranslatef(8., 0., 0.);
+		//	glCallList(keylist);
+		//glPopMatrix();
+		//Plus
 		glPushMatrix();
-			glTranslatef(-.8, 0., 0.);
+		glTranslatef(8.8, 0., 0.);
+		glCallList(keylist);
+		glPopMatrix();
+
+		//Backspace
+		glPushMatrix();
+			glTranslatef(9.6, 0., 0.);
+			glScalef(2., 1., 1.); //backspace is 2 unit
 			glCallList(keylist);
 		glPopMatrix();
 
@@ -929,8 +937,10 @@ InitGraphics( )
 	}
 	Pattern->SetVerbose(false);
 
-	unsigned char* tkey[41]{};
+	unsigned char* tkey[46]{};	//main keys
+	unsigned char* tkey2[20]{}; //special keys
 
+	//Main keys
 	tkey[0] = BmpToTexture("textures/1.bmp", &width, &height);
 	tkey[1] = BmpToTexture("textures/2.bmp", &width, &height);
 	tkey[2] = BmpToTexture("textures/3.bmp", &width, &height);
@@ -964,19 +974,31 @@ InitGraphics( )
 	tkey[30] = BmpToTexture("textures/z.bmp", &width, &height);
 	tkey[31] = BmpToTexture("textures/x.bmp", &width, &height);
 	tkey[32] = BmpToTexture("textures/c.bmp", &width, &height);
-
-	tkey[33] = BmpToTexture("textures/v.bmp", &width, &height); //These two are not working??
+	tkey[33] = BmpToTexture("textures/v.bmp", &width, &height);
 	tkey[34] = BmpToTexture("textures/b.bmp", &width, &height);
-
 	tkey[35] = BmpToTexture("textures/n.bmp", &width, &height);
 	tkey[36] = BmpToTexture("textures/m.bmp", &width, &height);
 	tkey[37] = BmpToTexture("textures/comma.bmp", &width, &height);
 	tkey[38] = BmpToTexture("textures/period.bmp", &width, &height);
 	tkey[39] = BmpToTexture("textures/questionmark.bmp", &width, &height);
+	tkey[40] = BmpToTexture("textures/s/tilde.bmp", &width, &height);
+	tkey[41] = BmpToTexture("textures/s/-.bmp", &width, &height);
+	tkey[42] = BmpToTexture("textures/s/+.bmp", &width, &height);
+	tkey[43] = BmpToTexture("textures/s/openbracket.bmp", &width, &height);
+	tkey[44] = BmpToTexture("textures/s/closedbracket.bmp", &width, &height);
+	tkey[45] = BmpToTexture("textures/s/quote.bmp", &width, &height);
+
+	//Extra keys
+	tkey2[0] = BmpToTexture("textures/s/tilde.bmp", &width, &height);
+	tkey2[1] = BmpToTexture("textures/s/tab.bmp", &width3, &height);
+	tkey2[2] = BmpToTexture("textures/s/caps.bmp", &width3, &height);
+	tkey2[3] = BmpToTexture("textures/s/shift.bmp", &width3, &height);
+
+
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	for(int i = 0; i<40; i++)
+	for(int i = 0; i<46; i++)
 	{
 	glGenTextures(1, &keytextures[i]);
 
@@ -2214,6 +2236,28 @@ void drawkey(struct Curve& k) {
 		glVertex3f(k.p3.x, k.p3.y, 0.);
 
 	glEnd();
+}
+
+void	dtkey(int i, int j, float w, GLuint* kt, int idx) {
+
+	glTranslatef(0.8 * i + (float(j) / 3), 0., 0.8 * j);
+
+		Pattern->Use();
+		Pattern->SetUniformVariable("uTime", Time);
+		Pattern->SetUniformVariable("uKa", uKa);
+		Pattern->SetUniformVariable("uKd", uKd);
+		Pattern->SetUniformVariable("uKs", uKs);
+		Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+		Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
+		Pattern->SetUniformVariable("uShininess", uShininess);
+
+		glActiveTexture(GL_TEXTURE6);                 // use texture unit 5
+		glBindTexture(GL_TEXTURE_2D, kt[idx]);
+		Pattern->SetUniformVariable("uTexUnit", 6);   // tell your shader program you are using texture unit 5
+
+		glCallList(keylist);
+
+	Pattern->Use(0);
 }
 
 // read a BMP file into a Texture:
