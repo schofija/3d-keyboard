@@ -178,6 +178,10 @@ const float uKa	= .3;
 const float uKd	= .3;
 const float uKs	= .3;
 
+const float uKa2 = 1.;
+const float uKd2 = 1.;
+const float uKs2 = 1.;
+
 const float uColorR = .25;
 const float uColorG = .25;
 const float uColorB = .25;
@@ -185,11 +189,11 @@ const float uColorB = .25;
 const float uSpecR = 1.;
 const float uSpecG = 1.;
 const float uSpecB = 1.;
-const float uShininess		= 1.;
+const float uShininess		= 100.;
 
 // Keyboard case 
 const float CASE_THICKNESS = 0.2;
-const float CASE_LENGTH = 4.6;
+const float CASE_LENGTH = 4.35;
 const float CASE_WIDTH = 12.3;
 const float CASE_HEIGHT = 0.75;
 
@@ -206,7 +210,8 @@ GLuint	AxesList;				// list to hold the axes
 GLuint	BoxList;				// object display list
 
 GLuint  keylist;				// List for keyboard keys
-GLuint	caselist;				// List for keyboard case			
+GLuint	caselist;				// List for keyboard case	
+								// I dont use either of these now that I have dynamic shading		
 
 int		ActiveButton;			// current button that is down
 int		AxesOn;					// != 0 means to draw the axes
@@ -301,7 +306,9 @@ float			Unit(float [3], float [3]);
 
 void	drawkey( struct Curve& ); // function to draw a key
 
-void	dtkey(int, int, float, GLuint*, int, int, int); //Parameters: collumn, row, width, texture array, index, keyi, keyj				
+void	dtkey(float, int, float, GLuint*, int, int, int); //Parameters: collumn (can do half collums for special spaced keys), row, width, texture array, index, keyi, keyj	
+
+void	drawcase();
 		
 void	OsuSphere(float, int, int);
 
@@ -475,20 +482,11 @@ Display( )
 
 	//glCallList( BoxList );
 	glPushMatrix();
-		Pattern->Use();
 
-			Pattern->SetUniformVariable("uTime", Time);
-			Pattern->SetUniformVariable("uKa", uKa);
-			Pattern->SetUniformVariable("uKd", uKd);
-			Pattern->SetUniformVariable("uKs", uKs);
-			Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
-			Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
-			Pattern->SetUniformVariable("uShininess", uShininess);
-			glTranslatef(-1.1, -0.1, -.5);
+			glTranslatef(-1.1, -0.1, -.35);
 
-				glCallList(caselist);
+				drawcase();
 
-		Pattern->Use(0);
 	glPopMatrix();
 
 	// This for loop covers most of the keys
@@ -512,18 +510,26 @@ Display( )
 
 		if(shift == false)
 		{
-		dtkey(-1, 2, 1.9, keytextures2, 3, -1, 8);	//capslk
+			dtkey(-1, 2, 1.9, keytextures2, 3, -1, 8);	//capslk
 		}
 		else
 		{
 			dtkey(-1, 2, 1.9, keytextures2, 4, -1, 8);	//capslk
 		}
 
+		// My math in these functions gets funky for the bottom row, so theres a
+		// lot of no-so-pretty hardcoded values here. 
 		dtkey(10, 2, 1., keytextures, 45, -1, 9);	//"
 		dtkey(11, 2, 2.2, keytextures2, 5, -1, 10); //enter
-
 		dtkey(-1, 3, 2.35, keytextures2, 6, -1, 11); //Lshift
 		dtkey(10, 3, 2.8, keytextures2, 6, -1, 12); //Rshift
+		dtkey(-1.9, 4, 1.75, keytextures2, 7, -1, 14); //Lctrl
+		dtkey(-0.05, 4, 1.75, keytextures2, 8, -1, 14); //Lalt
+		dtkey(7., 4, 1.75, keytextures2, 8, -1, 14); //Ralt
+		dtkey(10.55, 4, 1.75, keytextures2, 7, -1, 14); //Rctrl
+		dtkey(1, 4, 6.25, keytextures, 46, -1, 15); //space
+
+
 
 		// Bottom-row
 
@@ -829,7 +835,7 @@ InitGraphics( )
 
 	glutKeyboardFunc( Keyboard );
 	glutKeyboardUpFunc( KbdUp );
-	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF); //Repeat inputs off (not constantly repeating inputs if a key is held down)
+	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF); //Repeat inputs off (not constantly repeating inputs if a key is held down).
 
 	glutMouseFunc( MouseButton );
 	glutMotionFunc( MouseMotion );
@@ -945,6 +951,10 @@ InitGraphics( )
 	tkey2w[5] = width3;
 	tkey2[6] = BmpToTexture("textures/s/shift.bmp", &width3, &height);
 	tkey2w[6] = width3;
+	tkey2[7] = BmpToTexture("textures/s/ctrl.bmp", &width2, &height);
+	tkey2w[7] = width2;
+	tkey2[8] = BmpToTexture("textures/s/alt.bmp", &width2, &height);
+	tkey2w[8] = width2;
 	
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -1049,166 +1059,7 @@ InitLists( )
 	caselist = glGenLists( 1 );
 	glNewList( caselist, GL_COMPILE );
 
-		glBegin(GL_QUADS);
-		//glColor3f(.25, .25, .25);
-
-		glColor3f(.25, .25, .25);
-		glNormal3f(-1., 0., 0.);
-		glVertex3f(0., 0., 0.);
-		glNormal3f(-1., 0., 0.);
-		glVertex3f(0., CASE_HEIGHT, 0.);
-		glNormal3f(-1., 0., 0.);
-		glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(-1., 0., 0.);
-		glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
-
-		glNormal3f(1., 0., 0.);
-		glVertex3f(CASE_THICKNESS, 0., 0.);
-		glNormal3f(1., 0., 0.);
-		glVertex3f(CASE_THICKNESS, CASE_HEIGHT, 0.);
-		glNormal3f(1., 0., 0.);
-		glVertex3f(CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(1., 0., 0.);
-		glVertex3f(CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
-
-		glNormal3f(0., 1., 0.);
-		glVertex3f(0., CASE_HEIGHT, 0.);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_THICKNESS, CASE_HEIGHT, 0.);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
-
-		glNormal3f(0., -1., 0.);
-		glVertex3f(0., 0., 0.);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_THICKNESS, 0., 0.);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
-
-		glNormal3f(-1., 0., 0.);
-		glVertex3f(CASE_WIDTH, 0., 0.);
-		glNormal3f(-1., 0., 0.);
-		glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
-		glNormal3f(-1., 0., 0.);
-		glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(-1., 0., 0.);
-		glVertex3f(CASE_WIDTH, 0., CASE_LENGTH + CASE_THICKNESS);
-
-		glNormal3f(1., 0., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., 0.);
-		glNormal3f(1., 0., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, 0.);
-		glNormal3f(1., 0., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
-		glNormal3f(1., 0., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH);
-
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT,  0.);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT,  CASE_LENGTH);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_LENGTH);
-
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_WIDTH, 0., 0.);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_WIDTH, 0., 0.);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_WIDTH, 0., CASE_LENGTH);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_WIDTH, 0., CASE_LENGTH);
-
-		glNormal3f(0., -1., 0.);
-		glVertex3f(0., 0., 0.);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_WIDTH, 0., 0.);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_WIDTH, 0., CASE_THICKNESS);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(0., 0., CASE_THICKNESS);
-
-		glNormal3f(0., 1., 0.);
-		glVertex3f(0., CASE_HEIGHT, 0.);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_THICKNESS);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(0., CASE_HEIGHT, CASE_THICKNESS);
-
-		glNormal3f(0., 0., -1.);
-		glVertex3f(0., 0., 0.);
-		glNormal3f(0., 0., -1.);
-		glVertex3f(0., CASE_HEIGHT, 0.);
-		glNormal3f(0., 0., -1.);
-		glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
-		glNormal3f(0., 0., -1.);
-		glVertex3f(CASE_WIDTH, 0., 0.);
-
-		glNormal3f(0., 0., 1.);
-		glVertex3f(0., 0., CASE_THICKNESS);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(0., CASE_HEIGHT, CASE_THICKNESS);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_THICKNESS);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(CASE_WIDTH, 0., CASE_THICKNESS);
-
-		glNormal3f(0., -1., 0.);
-		glVertex3f(0., 0., CASE_LENGTH);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(0., -1., 0.);
-		glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
-
-		glNormal3f(0., 1., 0.);
-		glVertex3f(0., CASE_HEIGHT, CASE_LENGTH);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(0., 1., 0.);
-		glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
-
-		glNormal3f(0., 0., 1.);
-		glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
-
-		glNormal3f(0., 0., -1.);
-		glVertex3f(0., 0., CASE_LENGTH);
-		glNormal3f(0., 0., -1.);
-		glVertex3f(0., CASE_HEIGHT, CASE_LENGTH);
-		glNormal3f(0., 0., -1.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
-		glNormal3f(0., 0., -1.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH);
-
-		//Bottom
-		glColor3f(.15, .15, .15);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(0., 0., 0.);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
-		glNormal3f(0., 0., 1.);
-		glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., 0. );
-
-		glEnd();
+		drawcase();
 
 	glEndList();
 }
@@ -1225,10 +1076,16 @@ Keyboard( unsigned char c, int x, int y )
 	//Special modifiers
 	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
 	{
-		printf("SHIFT ACTIVE");
-		shift = true;
+		shift = !shift;
 	}
-	else { shift = false; }
+	if (glutGetModifiers() & GLUT_ACTIVE_CTRL)
+	{
+		ctrl = !ctrl;
+	}
+	if (glutGetModifiers() & GLUT_ACTIVE_ALT)
+	{
+		alt = !alt;
+	}
 
 	switch( c )
 	{
@@ -1639,6 +1496,13 @@ Keyboard( unsigned char c, int x, int y )
 		keyi = -1;
 		keyj = 10;
 		break;
+	case ' ':
+		printf(" Key pressed \n ");
+		keyReleased = false;
+		keyPressed = true;
+		keyi = -1;
+		keyj = 15;
+		break;
 
 	default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
@@ -1654,12 +1518,6 @@ Keyboard( unsigned char c, int x, int y )
 // keyboard callback for key RELEASES
 void KbdUp(unsigned char key, int x, int y)
 {
-	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
-	{
-		printf("SHIFT ACTIVE");
-		shift = true;
-	}
-	else { shift = false; }
 
 	switch (key)
 	{
@@ -2068,6 +1926,14 @@ void KbdUp(unsigned char key, int x, int y)
 			keyj = 10;
 			break;
 
+		case ' ':
+			printf(" Key pressed \n ");
+			keyPressed = false;
+			keyReleased = true;
+			keyi = -1;
+			keyj = 15;
+			break;
+
 	default:
 		fprintf(stderr, "Don't know what to do with keyboard hit: '%key' (0x%0x)\n", key, key);
 	}
@@ -2434,21 +2300,29 @@ void drawkey(struct Curve& k) {
 	glBegin(GL_QUADS);
 
 		// Left
+		glNormal3f(-1., 0., 0.);
 		glVertex3f(0., 0., 0.);
+		glNormal3f(-1., 0., 0.);
 		glVertex3f(0., 0., 0.75);
+		glNormal3f(-1., 0., 0.);
 		glVertex3f(0., k.p3.y, 0.75);
+		glNormal3f(-1., 0., 0.);
 		glVertex3f(0., k.p3.y, 0.);
 
 		// Right
+		glNormal3f(1., 0., 0.);
 		glVertex3f(k.p3.x, 0., 0.);
+		glNormal3f(1., 0., 0.);
 		glVertex3f(k.p3.x, 0., 0.75);
+		glNormal3f(1., 0., 0.);
 		glVertex3f(k.p3.x, k.p3.y, 0.75);
+		glNormal3f(1., 0., 0.);
 		glVertex3f(k.p3.x, k.p3.y, 0.);
 
 	glEnd();
 }
 
-void	dtkey(int i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
+void	dtkey(float i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
 
 		glPushMatrix();
 
@@ -2464,6 +2338,11 @@ void	dtkey(int i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
 		{
 			glTranslatef(0., 0., 0.);
 		}
+
+		if( shift == true && k1 == -1 && k2 == 11)
+			glTranslatef(0., -0.5, 0.);
+		else
+			glTranslatef(0., 0., 0.);
 		
 		if(i >= 0)
 		{
@@ -2480,7 +2359,14 @@ void	dtkey(int i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
 		Pattern->SetUniformVariable("uKa", uKa);
 		Pattern->SetUniformVariable("uKd", uKd);
 		Pattern->SetUniformVariable("uKs", uKs);
-		Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+		if (shift)
+		{
+			Pattern->SetUniformVariable("uColor", cos(90*Time / 12), 0., sin(90*Time / 12));
+		}
+		else
+		{
+			Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+		}
 		Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
 		Pattern->SetUniformVariable("uShininess", uShininess);
 
@@ -2493,6 +2379,244 @@ void	dtkey(int i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
 	Pattern->Use(0);
 
 		glPopMatrix();
+}
+
+void	drawcase()
+{
+	Pattern->Use();
+
+	Pattern->SetUniformVariable("uTime", Time);
+	Pattern->SetUniformVariable("uKa", uKa);
+	Pattern->SetUniformVariable("uKd", uKd);
+	Pattern->SetUniformVariable("uKs", uKs);
+	Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+	Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
+	Pattern->SetUniformVariable("uShininess", uShininess);
+
+	glBegin(GL_QUADS);
+	glColor3f(.25, .25, .25);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(0., 0., 0.);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(0., CASE_HEIGHT, 0.);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
+
+	glNormal3f(1., 0., 0.);
+	glVertex3f(CASE_THICKNESS, 0., 0.);
+	glNormal3f(1., 0., 0.);
+	glVertex3f(CASE_THICKNESS, CASE_HEIGHT, 0.);
+	glNormal3f(1., 0., 0.);
+	glVertex3f(CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(1., 0., 0.);
+	glVertex3f(CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
+
+	glNormal3f(0., 1., 0.);
+	glVertex3f(0., CASE_HEIGHT, 0.);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_THICKNESS, CASE_HEIGHT, 0.);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
+
+	glNormal3f(0., -1., 0.);
+	glVertex3f(0., 0., 0.);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_THICKNESS, 0., 0.);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
+
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(CASE_WIDTH, 0., 0.);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(CASE_WIDTH, 0., CASE_LENGTH + CASE_THICKNESS);
+
+	glNormal3f(1., 0., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., 0.);
+	glNormal3f(1., 0., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, 0.);
+	glNormal3f(1., 0., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
+	glNormal3f(1., 0., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH);
+
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, 0.);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_LENGTH);
+
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_WIDTH, 0., 0.);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_WIDTH, 0., 0.);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_WIDTH, 0., CASE_LENGTH);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_WIDTH, 0., CASE_LENGTH);
+
+	glNormal3f(0., -1., 0.);
+	glVertex3f(0., 0., 0.);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_WIDTH, 0., 0.);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_WIDTH, 0., CASE_THICKNESS);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(0., 0., CASE_THICKNESS);
+
+	glNormal3f(0., 1., 0.);
+	glVertex3f(0., CASE_HEIGHT, 0.);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_THICKNESS);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(0., CASE_HEIGHT, CASE_THICKNESS);
+
+	glNormal3f(0., 0., -1.);
+	glVertex3f(0., 0., 0.);
+	glNormal3f(0., 0., -1.);
+	glVertex3f(0., CASE_HEIGHT, 0.);
+	glNormal3f(0., 0., -1.);
+	glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
+	glNormal3f(0., 0., -1.);
+	glVertex3f(CASE_WIDTH, 0., 0.);
+
+	glNormal3f(0., 0., 1.);
+	glVertex3f(0., 0., CASE_THICKNESS);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(0., CASE_HEIGHT, CASE_THICKNESS);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_THICKNESS);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(CASE_WIDTH, 0., CASE_THICKNESS);
+
+	glNormal3f(0., -1., 0.);
+	glVertex3f(0., 0., CASE_LENGTH);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., -1., 0.);
+	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
+
+	glNormal3f(0., 1., 0.);
+	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
+
+	glNormal3f(0., 0., 1.);
+	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
+
+	glNormal3f(0., 0., -1.);
+	glVertex3f(0., 0., CASE_LENGTH);
+	glNormal3f(0., 0., -1.);
+	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH);
+	glNormal3f(0., 0., -1.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
+	glNormal3f(0., 0., -1.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH);
+
+	// The little indent in the case where there are no keys.
+	glNormal3f(0., 1., 0.);
+	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH - 0.8);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH - 0.8);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH);
+
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH -.08);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(9.4, 0., CASE_LENGTH - .08);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(9.4, 0., CASE_LENGTH);
+	glNormal3f(-1., 0., 0.);
+	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH);
+
+	glNormal3f(1., 0., 0.);
+	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH - .08);
+	glNormal3f(1., 0., 0.);
+	glVertex3f(10.75, 0., CASE_LENGTH - .08);
+	glNormal3f(1., 0., 0.);
+	glVertex3f(10.75, 0., CASE_LENGTH);
+	glNormal3f(1., 0., 0.);
+	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH);
+
+	glNormal3f(0., 0., -1.);
+	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH - 0.8);
+	glNormal3f(0., 0., -1.);
+	glVertex3f(9.4, 0., CASE_LENGTH - 0.8);
+	glNormal3f(0., 0., -1.);
+	glVertex3f(10.75, 0., CASE_LENGTH - 0.8);
+	glNormal3f(0., 0., -1.);
+	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH - 0.8);
+
+	glEnd();
+
+	Pattern->Use(0);
+
+	Pattern->Use();
+
+	Pattern->SetUniformVariable("uTime", Time);
+	Pattern->SetUniformVariable("uKa", uKa2);
+	Pattern->SetUniformVariable("uKd", uKd);
+	Pattern->SetUniformVariable("uKs", uKs2);
+	Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+	Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
+
+	if (alt)
+	{
+		Pattern->SetUniformVariable("uColor", cos(90 * Time / 12), tan(90 * Time / 12), sin(90 * Time / 12));
+	}
+
+	else
+	{
+		Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+	}
+	Pattern->SetUniformVariable("uShininess", uShininess);
+
+	glBegin(GL_QUADS);
+
+	//Bottom
+	glColor3f(.15, .15, .15);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(0., 0., 0.);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., 0., 1.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., 0.);
+
+	glEnd();
+
+	Pattern->Use(0);
+
 }
 
 // read a BMP file into a Texture:
