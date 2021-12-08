@@ -195,7 +195,7 @@ const float uShininess		= 100.;
 const float CASE_THICKNESS = 0.2;
 const float CASE_LENGTH = 4.35;
 const float CASE_WIDTH = 12.3;
-const float CASE_HEIGHT = 0.75;
+const float CASE_HEIGHT = 1.25;//0.75;
 
 
 // what options should we compile-in?
@@ -252,6 +252,10 @@ float	Xrot, Yrot;				// rotation angles in degrees
 	int width, height = 64;
 	int width2 = 96;	//For 1.25x, 1.5x keys
 	int width3 = 128;	//For 2x keys and longer
+
+	int widthcase = 256;
+	int heightcase = 128; //These values are for the case texture
+
 	int level = 0;
 	int ncomps = 3;
 	int border = 0;
@@ -483,7 +487,7 @@ Display( )
 	//glCallList( BoxList );
 	glPushMatrix();
 
-			glTranslatef(-1.1, -0.1, -.35);
+			glTranslatef(-1.1, -0.6, -.35);
 
 				drawcase();
 
@@ -924,7 +928,7 @@ InitGraphics( )
 	tkey[45] = BmpToTexture("textures/s/quote.bmp", &width, &height);
 	tkey[46] = BmpToTexture("textures/s/blank.bmp", &width, &height);
 
-	//Special width keys
+	//Special width
 	tkey2[0] = BmpToTexture("textures/s/backspace.bmp", &width3, &height);
 	tkey2w[0] = width3;
 	tkey2[1] = BmpToTexture("textures/s/tab.bmp", &width2, &height);
@@ -943,6 +947,8 @@ InitGraphics( )
 	tkey2w[7] = width2;
 	tkey2[8] = BmpToTexture("textures/s/alt.bmp", &width2, &height);
 	tkey2w[8] = width2;
+	tkey2[9] = BmpToTexture("textures/s/case.bmp", &widthcase, &heightcase);
+	tkey2w[9] = widthcase;
 	
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -959,7 +965,7 @@ InitGraphics( )
 		glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, tkey[i]);
 	}
 
-	for(int i = 0; i < 15; i++)
+	for(int i = 0; i < 9; i++)
 	{
 	glGenTextures(1, &keytextures2[i]);
 
@@ -970,6 +976,16 @@ InitGraphics( )
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, 3, tkey2w[i], height, 0, GL_RGB, GL_UNSIGNED_BYTE, tkey2[i]);
 	}
+
+	// Case texture
+	glGenTextures(1, &keytextures2[9]);
+
+	glBindTexture(GL_TEXTURE_2D, keytextures2[9]);// make the Tex0 texture current and set its parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, widthcase, heightcase, 0, GL_RGB, GL_UNSIGNED_BYTE, tkey2[9]);
 }
 
 
@@ -2383,192 +2399,290 @@ void	drawcase()
 	Pattern->SetUniformVariable("uKa", uKa);
 	Pattern->SetUniformVariable("uKd", uKd);
 	Pattern->SetUniformVariable("uKs", uKs);
-	Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
+	Pattern->SetUniformVariable("uColor", uColorR - .1, uColorG - .1, uColorB - .1);
 	Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
 	Pattern->SetUniformVariable("uShininess", uShininess);
+	glActiveTexture(GL_TEXTURE6);                 // use texture unit 5
+	glBindTexture(GL_TEXTURE_2D, keytextures2[9]); //blank key
+	Pattern->SetUniformVariable("uTexUnit", 6);   // tell your shader program you are using texture unit 5
 
 	glBegin(GL_QUADS);
 	glColor3f(.25, .25, .25);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., 0., 0.);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., CASE_HEIGHT, 0.);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
 
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(CASE_THICKNESS, 0., 0.);
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(CASE_THICKNESS, CASE_HEIGHT, 0.);
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
 
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., CASE_HEIGHT, 0.);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_THICKNESS, CASE_HEIGHT, 0.);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
 
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., 0., 0.);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_THICKNESS, 0., 0.);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
 
+	//doublecheck this
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(CASE_WIDTH, 0., 0.);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(CASE_WIDTH, 0., CASE_LENGTH + CASE_THICKNESS);
 
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., 0.);
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, 0.);
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH);
 
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, 0.);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_LENGTH);
 
+	//this one too
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(CASE_WIDTH, 0., 0.);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(CASE_WIDTH, 0., 0.);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH, 0., CASE_LENGTH);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH, 0., CASE_LENGTH);
 
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., 0., 0.);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH, 0., 0.);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH, 0., CASE_THICKNESS);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., 0., CASE_THICKNESS);
 
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., CASE_HEIGHT, 0.);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_THICKNESS);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., CASE_HEIGHT, CASE_THICKNESS);
 
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., 0., 0.);
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., CASE_HEIGHT, 0.);
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH, CASE_HEIGHT, 0.);
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH, 0., 0.);
 
 	glNormal3f(0., 0., 1.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., 0., CASE_THICKNESS);
 	glNormal3f(0., 0., 1.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., CASE_HEIGHT, CASE_THICKNESS);
 	glNormal3f(0., 0., 1.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH, CASE_HEIGHT, CASE_THICKNESS);
 	glNormal3f(0., 0., 1.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH, 0., CASE_THICKNESS);
 
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., 0., CASE_LENGTH);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
 
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
 
 	glNormal3f(0., 0., 1.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(0., 0., 1.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(0., 0., 1.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH + CASE_THICKNESS);
 	glNormal3f(0., 0., 1.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
 
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(0., 0., CASE_LENGTH);
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(0., CASE_HEIGHT, CASE_LENGTH);
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, CASE_HEIGHT, CASE_LENGTH);
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH);
 
 	// The little indent in the case where there are no keys.
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH - 0.8);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH - 0.8);
 	glNormal3f(0., 1., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH);
 
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH -.08);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(9.4, 0., CASE_LENGTH - .08);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(9.4, 0., CASE_LENGTH);
 	glNormal3f(-1., 0., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH);
 
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH - .08);
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(10.75, 0., CASE_LENGTH - .08);
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(10.75, 0., CASE_LENGTH);
 	glNormal3f(1., 0., 0.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH);
 
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(0., 1.);
 	glVertex3f(9.4, CASE_HEIGHT, CASE_LENGTH - 0.8);
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(0., 0.);
 	glVertex3f(9.4, 0., CASE_LENGTH - 0.8);
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(1., 0.);
 	glVertex3f(10.75, 0., CASE_LENGTH - 0.8);
 	glNormal3f(0., 0., -1.);
+	glTexCoord2f(1., 1.);
 	glVertex3f(10.75, CASE_HEIGHT, CASE_LENGTH - 0.8);
+
+	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 0.);
+	glVertex3f(0., 0., 0.);
+	glNormal3f(0., -1., 0.);
+	glTexCoord2f(0., 1.);
+	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 1.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., -1., 0.);
+	glTexCoord2f(1., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., 0.);
 
 	glEnd();
 
@@ -2599,16 +2713,16 @@ void	drawcase()
 
 	glBegin(GL_QUADS);
 
-	//Bottom
+	//backplate (for backlighting)
 	glColor3f(.15, .15, .15);
-	glNormal3f(0., 0., 1.);
-	glVertex3f(0., 0., 0.);
-	glNormal3f(0., 0., 1.);
-	glVertex3f(0., 0., CASE_LENGTH + CASE_THICKNESS);
-	glNormal3f(0., 0., 1.);
-	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., CASE_LENGTH + CASE_THICKNESS);
-	glNormal3f(0., 0., 1.);
-	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0., 0.);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(0., 0.01, 0.);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(0., 0.01, CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0.01, CASE_LENGTH + CASE_THICKNESS);
+	glNormal3f(0., 1., 0.);
+	glVertex3f(CASE_WIDTH + CASE_THICKNESS, 0.01, 0.);
 
 	glEnd();
 
