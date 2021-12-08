@@ -19,7 +19,7 @@ does not appear to be returning this modifier state on my machine.
 
 Screenshots of the program:
 
-![program-screenshot1](https://cdn.discordapp.com/attachments/330167370159226891/918001670540115989/unknown.png?raw=true "Program Screenshot")
+![program-screenshot1](https://cdn.discordapp.com/attachments/330167370159226891/918002632751194142/unknown.png?raw=true "Program Screenshot")
 ![program-screenshot2](https://cdn.discordapp.com/attachments/330167370159226891/918001727184183316/unknown.png?raw=true " ")
 ![program-screenshot3](https://cdn.discordapp.com/attachments/330167370159226891/918001781563351150/unknown.png?raw=true " ")
 ![program-screenshot4](https://cdn.discordapp.com/attachments/330167370159226891/918001838786215947/unknown.png?raw=true " ")
