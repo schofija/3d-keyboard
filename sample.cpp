@@ -507,15 +507,7 @@ Display( )
 		dtkey(10, 1, 1., keytextures, 43, -1, 5);	//[{
 		dtkey(11, 1, 1., keytextures, 44, -1, 6);	//[{
 		dtkey(12, 1, 1.55, keytextures2, 2, -1, 7);	//line
-
-		if(shift == false)
-		{
-			dtkey(-1, 2, 1.9, keytextures2, 3, -1, 8);	//capslk
-		}
-		else
-		{
-			dtkey(-1, 2, 1.9, keytextures2, 4, -1, 8);	//capslk
-		}
+		dtkey(-1, 2, 1.9, keytextures2, 3, -1, 8);	//capslk
 
 		// My math in these functions gets funky for the bottom row, so theres a
 		// lot of no-so-pretty hardcoded values here. 
@@ -528,10 +520,6 @@ Display( )
 		dtkey(7., 4, 1.75, keytextures2, 8, -1, 14); //Ralt
 		dtkey(10.55, 4, 1.75, keytextures2, 7, -1, 14); //Rctrl
 		dtkey(1, 4, 6.25, keytextures, 46, -1, 15); //space
-
-
-
-		// Bottom-row
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
@@ -2338,11 +2326,6 @@ void	dtkey(float i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
 		{
 			glTranslatef(0., 0., 0.);
 		}
-
-		if( shift == true && k1 == -1 && k2 == 11)
-			glTranslatef(0., -0.5, 0.);
-		else
-			glTranslatef(0., 0., 0.);
 		
 		if(i >= 0)
 		{
@@ -2370,9 +2353,20 @@ void	dtkey(float i, int j, float w, GLuint* kt, int idx, int k1, int k2) {
 		Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
 		Pattern->SetUniformVariable("uShininess", uShininess);
 
-		glActiveTexture(GL_TEXTURE6);                 // use texture unit 5
-		glBindTexture(GL_TEXTURE_2D, kt[idx]);
-		Pattern->SetUniformVariable("uTexUnit", 6);   // tell your shader program you are using texture unit 5
+		if( ctrl == false)
+		{
+			glActiveTexture(GL_TEXTURE6);                 // use texture unit 5
+			glBindTexture(GL_TEXTURE_2D, kt[idx]);
+			Pattern->SetUniformVariable("uTexUnit", 6);   // tell your shader program you are using texture unit 5
+		}
+
+		else
+		{
+			glActiveTexture(GL_TEXTURE6);                 // use texture unit 5
+			glBindTexture(GL_TEXTURE_2D, keytextures[46]); //blank key
+			Pattern->SetUniformVariable("uTexUnit", 6);   // tell your shader program you are using texture unit 5
+
+		}
 
 		glCallList(keylist);
 
@@ -2583,15 +2577,18 @@ void	drawcase()
 	Pattern->Use();
 
 	Pattern->SetUniformVariable("uTime", Time);
-	Pattern->SetUniformVariable("uKa", uKa2);
+	Pattern->SetUniformVariable("uKa", uKa);
 	Pattern->SetUniformVariable("uKd", uKd);
-	Pattern->SetUniformVariable("uKs", uKs2);
+	Pattern->SetUniformVariable("uKs", uKs);
 	Pattern->SetUniformVariable("uColor", uColorR, uColorG, uColorB);
 	Pattern->SetUniformVariable("uSpecularColor", uSpecR, uSpecG, uSpecB);
 
 	if (alt)
 	{
 		Pattern->SetUniformVariable("uColor", cos(90 * Time / 12), tan(90 * Time / 12), sin(90 * Time / 12));
+		Pattern->SetUniformVariable("uKa", uKa2);
+		Pattern->SetUniformVariable("uKd", uKd2);
+		Pattern->SetUniformVariable("uKs", uKs2);
 	}
 
 	else
