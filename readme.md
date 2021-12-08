@@ -1,4 +1,4 @@
-This is my final project for CS450 Fall 2021.
+# CS450 FALL 2021 FINAL PROJECT -- schofija
 
 This is a 3D model of a keyboard (specifically a 60% layout).
 
@@ -12,6 +12,10 @@ to actual inputs is a bit tricky. Instead, I've given SHIFT/CTRL/ALT alternate f
 - Pressing ALT + any key will toggle a backlight for the keys.
 
 - Pressing CTRL + any key will toggle labels for the keys.
+
+- CAPSLOCK, while being a modifier key, does not have functionality. While CAPSLOCK is enabled,
+GLUT_ACTIVE_SHIFT (the modifier key state when SHIFT is pressed) *should* be returned. However, CAPSLOCK
+does not appear to be returning this modifier state on my machine. Documentation glutGetModifers() can be found [here](https://www.opengl.org/resources/libraries/glut/spec3/node73.html) 
 
 Screenshots of the program:
 
