@@ -1,5 +1,27 @@
 This is my final project for CS450 Fall 2021.
 
+This is a 3D model of a keyboard (specifically a 60% layout).
+
+All non-modifier keys are able to be pressed/released by their corresponding key input.
+
+As glutGetModifiers() can only be called when a callback is generated, mapping modifier keys (SHIFT, CTRL, ALT) 
+to actual inputs is a bit tricky. Instead, I've given SHIFT/CTRL/ALT alternate features to modify the scene.
+
+- Pressing SHIFT + any key will toggle key lighting
+
+- Pressing ALT + any key will toggle a backlight for the keys.
+
+- Pressing CTRL + any key will toggle labels for the keys.
+
+Screenshots of the program:
+
+![program-screenshot1](https://cdn.discordapp.com/attachments/330167370159226891/917987536327049226/unknown.png?raw=true "Program Screenshot")
+![program-screenshot2](https://cdn.discordapp.com/attachments/330167370159226891/917987613091201114/unknown.png?raw=true " ")
+![program-screenshot3](https://cdn.discordapp.com/attachments/330167370159226891/917987667898163210/unknown.png?raw=true " ")
+![program-screenshot4](https://cdn.discordapp.com/attachments/330167370159226891/917987746096742430/unknown.png?raw=true " ")
+
+***GETTING THIS TO WORK***
+
 I do not include all the files needed to run this program.
 
 A visual studio solution with all needed additional files can be found here:
@@ -10,6 +32,3 @@ Copy all of the files in this repo into the SampleFreeGlut2019 folder.
 
 glslprogram.cpp will needed to be added as a source file in VS
 (Right click 'Source Files' -> Add -> Existing Item)
-
-![program-screenshot](https://cdn.discordapp.com/attachments/330167370159226891/917696017409921024/unknown.png?raw=true "Program Screenshot")
-
