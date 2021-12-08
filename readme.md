@@ -13,9 +13,9 @@ to actual inputs is a bit tricky. Instead, I've given SHIFT/CTRL/ALT alternate f
 
 - Pressing CTRL + any key will toggle labels for the keys.
 
-- CAPSLOCK, while being a modifier key, does not have functionality. While CAPSLOCK is enabled,
+- CAPSLOCK, while being a modifier key, does not have functionality. According to the [documentation for glutGetModifers()](https://www.opengl.org/resources/libraries/glut/spec3/node73.html), while CAPSLOCK is enabled,
 GLUT_ACTIVE_SHIFT (the modifier key state when SHIFT is pressed) *should* be returned. However, CAPSLOCK
-does not appear to be returning this modifier state on my machine. Documentation glutGetModifers() can be found [here](https://www.opengl.org/resources/libraries/glut/spec3/node73.html) 
+does not appear to be returning this modifier state on my machine.
 
 Screenshots of the program:
 
